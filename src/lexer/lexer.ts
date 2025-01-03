@@ -51,9 +51,10 @@ export function tokenize(sourceCode: string): Token[] {
       } else {
         const char = src[0]; // Store the invalid character
         const charCode = char.charCodeAt(0);
-        throw new Error(
+        console.error(
           `Unrecognized token found in source code: ${charCode} -> '${char}'`
         );
+        Deno.exit(1);
       }
     }
   }

@@ -1,8 +1,22 @@
-export function add(a: number, b: number): number {
-  return a + b;
+import Parser from "./parser/parser.ts";
+
+function repl() {
+  const parser = new Parser();
+  console.log("Repl v0.1");
+
+  while (true) {
+    const input = prompt("> ");
+
+    if (!input || input.includes("exit")) {
+      Deno.exit(1);
+    }
+
+    const program = parser.produceAST(input);
+    console.log(program);
+  }
 }
 
 // Learn more at https://docs.deno.com/runtime/manual/examples/module_metadata#concepts
 if (import.meta.main) {
-  console.log("Add 2 + 3 =", add(2, 3));
+  repl();
 }

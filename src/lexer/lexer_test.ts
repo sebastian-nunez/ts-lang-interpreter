@@ -72,9 +72,4 @@ describe("tokenize()", () => {
     ];
     assertEquals(tokenize(source), expected);
   });
-
-  it("should handle unrecognized tokens", () => {
-    const source = "@";
-    assertThrows(() => tokenize(source));
-  });
 });
