@@ -14,18 +14,18 @@ export function tokenize(sourceCode: string): Token[] {
   // TODO: this is NOT a memory efficient implementation! shift() on it's own is expensive, regardless, just learning :)
   while (src.length > 0) {
     if (src[0] === "(") {
-      tokens.push(newToken(src.shift(), TokenType.OpenParen));
+      tokens.push(newToken(TokenType.OpenParen, src.shift()));
     } else if (src[0] === ")") {
-      tokens.push(newToken(src.shift(), TokenType.ClosedParen));
+      tokens.push(newToken(TokenType.ClosedParen, src.shift()));
     } else if (
       src[0] === "+" ||
       src[0] === "-" ||
       src[0] === "*" ||
       src[0] === "/"
     ) {
-      tokens.push(newToken(src.shift(), TokenType.BinaryOperator));
+      tokens.push(newToken(TokenType.BinaryOperator, src.shift()));
     } else if (src[0] === "=") {
-      tokens.push(newToken(src.shift(), TokenType.Equals));
+      tokens.push(newToken(TokenType.Equals, src.shift()));
     } else {
       // Handle multi-character tokens
       if (isInt(src[0])) {
@@ -33,7 +33,7 @@ export function tokenize(sourceCode: string): Token[] {
         while (src.length > 0 && isInt(src[0])) {
           num += src.shift();
         }
-        tokens.push(newToken(num, TokenType.Number));
+        tokens.push(newToken(TokenType.Number, num));
       } else if (isAlpha(src[0])) {
         let identifier = "";
         while (src.length > 0 && isAlpha(src[0])) {
@@ -42,9 +42,9 @@ export function tokenize(sourceCode: string): Token[] {
 
         const reservedToken = KEYWORDS[identifier];
         if (reservedToken) {
-          tokens.push(newToken(identifier, reservedToken));
+          tokens.push(newToken(reservedToken, identifier));
         } else {
-          tokens.push(newToken(identifier, TokenType.Identifier));
+          tokens.push(newToken(TokenType.Identifier, identifier));
         }
       } else if (isSkippable(src[0])) {
         src.shift();
@@ -58,5 +58,6 @@ export function tokenize(sourceCode: string): Token[] {
     }
   }
 
+  tokens.push(newToken(TokenType.EOF, "EOF"));
   return tokens;
 }

@@ -8,13 +8,14 @@ describe("tokenize()", () => {
   it("should tokenize single character tokens", () => {
     const source = "( ) + - * / =";
     const expected: Token[] = [
-      newToken("(", TokenType.OpenParen),
-      newToken(")", TokenType.ClosedParen),
-      newToken("+", TokenType.BinaryOperator),
-      newToken("-", TokenType.BinaryOperator),
-      newToken("*", TokenType.BinaryOperator),
-      newToken("/", TokenType.BinaryOperator),
-      newToken("=", TokenType.Equals),
+      newToken(TokenType.OpenParen, "("),
+      newToken(TokenType.ClosedParen, ")"),
+      newToken(TokenType.BinaryOperator, "+"),
+      newToken(TokenType.BinaryOperator, "-"),
+      newToken(TokenType.BinaryOperator, "*"),
+      newToken(TokenType.BinaryOperator, "/"),
+      newToken(TokenType.Equals, "="),
+      newToken(TokenType.EOF, "EOF"),
     ];
     assertEquals(tokenize(source), expected);
   });
@@ -22,10 +23,11 @@ describe("tokenize()", () => {
   it("should tokenize numbers", () => {
     const source = "123 45 0 9876543210";
     const expected: Token[] = [
-      newToken("123", TokenType.Number),
-      newToken("45", TokenType.Number),
-      newToken("0", TokenType.Number),
-      newToken("9876543210", TokenType.Number),
+      newToken(TokenType.Number, "123"),
+      newToken(TokenType.Number, "45"),
+      newToken(TokenType.Number, "0"),
+      newToken(TokenType.Number, "9876543210"),
+      newToken(TokenType.EOF, "EOF"),
     ];
     assertEquals(tokenize(source), expected);
   });
@@ -33,10 +35,11 @@ describe("tokenize()", () => {
   it("should tokenize identifiers and keywords", () => {
     const source = "let myVariable anotherVariable let";
     const expected: Token[] = [
-      newToken("let", TokenType.Let),
-      newToken("myVariable", TokenType.Identifier),
-      newToken("anotherVariable", TokenType.Identifier),
-      newToken("let", TokenType.Let),
+      newToken(TokenType.Let, "let"),
+      newToken(TokenType.Identifier, "myVariable"),
+      newToken(TokenType.Identifier, "anotherVariable"),
+      newToken(TokenType.Let, "let"),
+      newToken(TokenType.EOF, "EOF"),
     ];
     assertEquals(tokenize(source), expected);
   });
@@ -44,30 +47,34 @@ describe("tokenize()", () => {
   it("should tokenize a complex expression", () => {
     const source = "let x = 10 + 5 * (2 - 1)";
     const expected: Token[] = [
-      newToken("let", TokenType.Let),
-      newToken("x", TokenType.Identifier),
-      newToken("=", TokenType.Equals),
-      newToken("10", TokenType.Number),
-      newToken("+", TokenType.BinaryOperator),
-      newToken("5", TokenType.Number),
-      newToken("*", TokenType.BinaryOperator),
-      newToken("(", TokenType.OpenParen),
-      newToken("2", TokenType.Number),
-      newToken("-", TokenType.BinaryOperator),
-      newToken("1", TokenType.Number),
-      newToken(")", TokenType.ClosedParen),
+      newToken(TokenType.Let, "let"),
+      newToken(TokenType.Identifier, "x"),
+      newToken(TokenType.Equals, "="),
+      newToken(TokenType.Number, "10"),
+      newToken(TokenType.BinaryOperator, "+"),
+      newToken(TokenType.Number, "5"),
+      newToken(TokenType.BinaryOperator, "*"),
+      newToken(TokenType.OpenParen, "("),
+      newToken(TokenType.Number, "2"),
+      newToken(TokenType.BinaryOperator, "-"),
+      newToken(TokenType.Number, "1"),
+      newToken(TokenType.ClosedParen, ")"),
+      newToken(TokenType.EOF, "EOF"),
     ];
     assertEquals(tokenize(source), expected);
   });
 
   it("should tokenize skippable characters", () => {
     const source = " \t\n123";
-    const expected: Token[] = [newToken("123", TokenType.Number)];
+    const expected: Token[] = [
+      newToken(TokenType.Number, "123"),
+      newToken(TokenType.EOF, "EOF"),
+    ];
     assertEquals(tokenize(source), expected);
   });
 
   it("should handle unrecognized tokens", () => {
-    const source = "@!";
+    const source = "@";
     assertThrows(() => tokenize(source));
   });
 });

@@ -12,15 +12,16 @@ export enum TokenType {
   Equals,
   OpenParen,
   ClosedParen,
+  EOF,
 }
 
 /** Token represents a single token from the source code */
 export interface Token {
-  value: string;
   type: TokenType;
+  value: string;
 }
 
 /** newToken returns token of given value and type */
-export function newToken(value: string = "", type: TokenType): Token {
-  return { value, type };
+export function newToken(type: TokenType, value: string = ""): Token {
+  return { type, value };
 }

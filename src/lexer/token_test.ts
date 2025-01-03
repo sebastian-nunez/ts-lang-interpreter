@@ -7,7 +7,7 @@ describe("newToken()", () => {
     const value = "";
     const type = TokenType.Equals;
 
-    const result = newToken(value, type);
+    const result = newToken(type, value);
 
     assertEquals(result, { value, type });
   });
@@ -16,7 +16,7 @@ describe("newToken()", () => {
     const value = "=";
     const type = TokenType.Equals;
 
-    const result = newToken(value, type);
+    const result = newToken(type, value);
 
     assertEquals(result, { value, type });
   });
