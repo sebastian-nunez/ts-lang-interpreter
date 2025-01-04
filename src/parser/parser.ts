@@ -2,6 +2,7 @@ import {
   BinaryExpr,
   Expr,
   Identifier,
+  NullLiteral,
   NumericLiteral,
 } from "../ast/expressions.ts";
 import { Program, Stmt } from "../ast/statements.ts";
@@ -133,6 +134,14 @@ export default class Parser {
           value,
         };
         return number;
+      }
+      case TokenType.Null: {
+        this.next(); // advance past "null"
+        const nullLiteral: NullLiteral = {
+          kind: "NullLiteral",
+          value: "null",
+        };
+        return nullLiteral;
       }
       case TokenType.OpenParen: {
         // Open parenthesis, indicates we have another inner expression to evaluate

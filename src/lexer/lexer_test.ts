@@ -72,4 +72,13 @@ describe("tokenize()", () => {
     ];
     assertEquals(tokenize(source), expected);
   });
+
+  it("should tokenize null keyword", () => {
+    const source = "null";
+    const expected: Token[] = [
+      newToken(TokenType.Null, "null"),
+      newToken(TokenType.EOF, "EOF"),
+    ];
+    assertEquals(tokenize(source), expected);
+  });
 });

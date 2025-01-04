@@ -4,6 +4,7 @@ import { newToken, Token, TokenType } from "./token.ts";
 /** KEYWORDS is a constant lookup for keywords and known identifiers + symbols */
 const KEYWORDS: Record<string, TokenType> = {
   let: TokenType.Let,
+  null: TokenType.Null,
 };
 
 /** tokenize receives source code and returns all the extracted tokens. Throws an error if any token is not recognized */
@@ -41,8 +42,9 @@ export function tokenize(sourceCode: string): Token[] {
           identifier += src.shift();
         }
 
+        // TokenType is an enum, so values are represented as numbers
         const reservedToken = KEYWORDS[identifier];
-        if (reservedToken) {
+        if (typeof reservedToken === "number") {
           tokens.push(newToken(reservedToken, identifier));
         } else {
           tokens.push(newToken(TokenType.Identifier, identifier));

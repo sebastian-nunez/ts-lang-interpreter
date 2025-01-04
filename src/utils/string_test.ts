@@ -59,6 +59,12 @@ describe("isInt()", () => {
 });
 
 describe("isSkippable()", () => {
+  it("should return false given a valid token value", () => {
+    const str = "let";
+    const result = isSkippable(str);
+    assertEquals(result, false);
+  });
+
   it("should return true given newline", () => {
     const str = "\n";
     const result = isSkippable(str);
@@ -71,19 +77,19 @@ describe("isSkippable()", () => {
     assertEquals(result, true);
   });
 
-  it("should return true given tab'", () => {
+  it("should return true given tab", () => {
     const str = "\t";
     const result = isSkippable(str);
     assertEquals(result, true);
   });
 
-  it("should return true given return'", () => {
+  it("should return true given return", () => {
     const str = "\r";
     const result = isSkippable(str);
     assertEquals(result, true);
   });
 
-  it("should return true given backspace'", () => {
+  it("should return true given backspace", () => {
     const str = "\b";
     const result = isSkippable(str);
     assertEquals(result, true);

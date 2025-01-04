@@ -28,4 +28,10 @@ export interface NumericLiteral extends Expr {
   value: number;
 }
 
+/** NullLiteral represents null inside the source code. */
+export interface NullLiteral extends Expr {
+  kind: "NullLiteral";
+  value: "null";
+}
+
 // TODO: implement UnaryExpr, CallExpr
