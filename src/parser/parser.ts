@@ -1,4 +1,9 @@
-import { Expr, Identifier, NumericLiteral } from "../ast/expressions.ts";
+import {
+  BinaryExpr,
+  Expr,
+  Identifier,
+  NumericLiteral,
+} from "../ast/expressions.ts";
 import { Program, Stmt } from "../ast/statements.ts";
 import { tokenize } from "../lexer/lexer.ts";
 import { Token, TokenType } from "../lexer/token.ts";
@@ -23,33 +28,83 @@ export default class Parser {
 
   /** parse_stmt handle complex statement types */
   private parse_stmt(): Stmt {
-    // TODO: add FunctionaDeclaration, TryCatch, VariableDeclaration, Loops
+    // TODO: add FunctionDeclaration, TryCatch, VariableDeclaration, Loops, etc.
     // For now, skip to parse_expr
     return this.parse_expr();
   }
 
-  /** parse_expr handle expressions.
+  /**
+   * parse_expr handles expressions.
    *
-   *  Orders of precedence:
-   *  1. AdditiveExpr
-   *  2. MultiplicativeExpr
-   *  3. PrimaryExpr
+   * Orders of precedence (from lowest to highest):
+   *
+   *  - AssignmentExpr
+   *  - MemberExpr
+   *  - FunctionCall
+   *  - LogicalExpr
+   *  - ComparisonExpr
+   *  - AdditiveExpr
+   *  - MultiplicativeExpr
+   *  - UnaryExpr
+   *  - PrimaryExpr
+   *
+   * Note: Lower numbers indicate higher precedence. This means PrimaryExpr
+   * has the highest precedence and AssignmentExpr has the lowest.
    */
   private parse_expr(): Expr {
     // TODO: implement
     return this.parse_additive_expr();
   }
 
-  /** parse_additive_expr handles addition and subtraction operations */
+  /**
+   * parse_additive_expr handles addition and subtraction operations.
+   *
+   * Implements left-hand precedence. So, `10 + 5 - 5` is treated as `(10 + 5) - 5`,
+   * where the items in the parenthesis is actually its own additive expression.
+   */
   private parse_additive_expr(): Expr {
-    // TODO: implement
-    return this.parse_multiplicative_expr();
+    let left = this.parse_multiplicative_expr();
+
+    while (this.at().value === "+" || this.at().value === "-") {
+      const operator = this.next().value;
+      const right = this.parse_multiplicative_expr();
+
+      // Keep parsing the left side recursively
+      const expr: BinaryExpr = {
+        kind: "BinaryExpr",
+        left,
+        right,
+        operator,
+      };
+      left = expr;
+    }
+
+    return left;
   }
 
   /** parse_multiplicative_expr handles multiplication, division & modulo operations */
   private parse_multiplicative_expr(): Expr {
-    // TODO: implement
-    return this.parse_primary_expr();
+    let left = this.parse_primary_expr();
+
+    while (
+      this.at().value === "/" ||
+      this.at().value === "*" ||
+      this.at().value === "%"
+    ) {
+      const operator = this.next().value;
+      const right = this.parse_primary_expr();
+
+      // Keep parsing the left side recursively
+      const expr: BinaryExpr = {
+        kind: "BinaryExpr",
+        left,
+        right,
+        operator,
+      };
+      left = expr;
+    }
+
+    return left;
   }
 
   /** parse_primary_expr parse literal values & grouping expressions. Throws errors. */
@@ -81,7 +136,11 @@ export default class Parser {
       }
       default:
         console.error(
-          `Unexpected token found during parsing: ${JSON.stringify(this.at())}`
+          `Unexpected token found during parsing: ${JSON.stringify(
+            this.at(),
+            null,
+            2
+          )}`
         );
         Deno.exit(1);
     }
@@ -89,8 +148,8 @@ export default class Parser {
 
   /** next consumes the current token and advances the tokens array to the next value */
   private next(): Token {
-    const prev = this.tokens.shift();
-    return prev!;
+    const prev = this.tokens.shift() as Token;
+    return prev;
   }
 
   /** at returns the currently available token */

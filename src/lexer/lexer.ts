@@ -21,7 +21,8 @@ export function tokenize(sourceCode: string): Token[] {
       src[0] === "+" ||
       src[0] === "-" ||
       src[0] === "*" ||
-      src[0] === "/"
+      src[0] === "/" ||
+      src[0] === "%"
     ) {
       tokens.push(newToken(TokenType.BinaryOperator, src.shift()));
     } else if (src[0] === "=") {
