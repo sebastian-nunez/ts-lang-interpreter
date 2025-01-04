@@ -134,6 +134,13 @@ export default class Parser {
         };
         return number;
       }
+      case TokenType.OpenParen: {
+        // Open parenthesis, indicates we have another inner expression to evaluate
+        this.next(); // Open parenthesis
+        const value = this.parse_expr(); // Inner expression
+        this.next_expect(TokenType.ClosedParen, "Unmatched parenthesis"); // Closing parenthesis
+        return value;
+      }
       default:
         console.error(
           `Unexpected token found during parsing: ${JSON.stringify(
@@ -149,6 +156,26 @@ export default class Parser {
   /** next consumes the current token and advances the tokens array to the next value */
   private next(): Token {
     const prev = this.tokens.shift() as Token;
+    return prev;
+  }
+
+  /**
+   * next_expect returns the current token and then advances the tokens array to the next value,
+   * while checking the type of expected token.
+   *
+   * Exits the program if the values do not match.
+   */
+  private next_expect(type: TokenType, error: string | Error) {
+    const prev = this.tokens.shift() as Token;
+    if (!prev || prev.type !== type) {
+      console.error(
+        `Parser error:\n${error}, got ${JSON.stringify(
+          prev
+        )} - expected: ${type}`
+      );
+      Deno.exit(1);
+    }
+
     return prev;
   }
 
