@@ -1,18 +1,20 @@
 import { Program, Stmt } from "../ast/statements.ts";
 import { NullVal, NumberVal, RuntimeVal } from "./values.ts";
 import { BinaryExpr, NumericLiteral } from "../ast/expressions.ts";
+import Environment from "./environment.ts";
 
 /** evaluate evaluates AST node statements into real runtime values */
-export function evaluate(astNode: Stmt): RuntimeVal {
+export function evaluate(astNode: Stmt, env: Environment): RuntimeVal {
   switch (astNode.kind) {
     case "Program":
-      return eval_program(astNode as Program);
+      return eval_program(astNode as Program, env);
     case "NumericLiteral":
       return eval_numeric_literal(astNode as NumericLiteral);
     case "NullLiteral":
       return eval_null_literal();
+    // TODO: handle Identifiers
     case "BinaryExpr":
-      return eval_binary_expr(astNode as BinaryExpr);
+      return eval_binary_expr(astNode as BinaryExpr, env);
     default:
       console.error(
         `This AST node has not been setup for interpretation: ${JSON.stringify(
@@ -25,14 +27,14 @@ export function evaluate(astNode: Stmt): RuntimeVal {
   }
 }
 
-function eval_program(program: Program): RuntimeVal {
+function eval_program(program: Program, env: Environment): RuntimeVal {
   let lastEvaluated: RuntimeVal = {
     type: "null",
     value: "null",
   } as NullVal;
 
   for (const statement of program.body) {
-    lastEvaluated = evaluate(statement);
+    lastEvaluated = evaluate(statement, env);
   }
   return lastEvaluated;
 }
@@ -55,9 +57,12 @@ function eval_null_literal(): RuntimeVal {
   return nullVal;
 }
 
-function eval_binary_expr(binaryExpr: BinaryExpr): RuntimeVal {
-  const lhs = evaluate(binaryExpr.left);
-  const rhs = evaluate(binaryExpr.right);
+function eval_binary_expr(
+  binaryExpr: BinaryExpr,
+  env: Environment
+): RuntimeVal {
+  const lhs = evaluate(binaryExpr.left, env);
+  const rhs = evaluate(binaryExpr.right, env);
 
   if (lhs.type === "number" && rhs.type === "number") {
     return eval_numeric_binary_expr(

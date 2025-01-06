@@ -1,8 +1,10 @@
 import Parser from "./parser/parser.ts";
+import Environment from "./runtime/environment.ts";
 import { evaluate } from "./runtime/interpreter.ts";
 
 function repl() {
   const parser = new Parser();
+  const env = new Environment();
   console.log("Repl v0.1");
 
   while (true) {
@@ -17,7 +19,7 @@ function repl() {
     console.log(JSON.stringify(program, null, 2));
 
     console.log("----- Evaluated result -----");
-    const result = evaluate(program);
+    const result = evaluate(program, env);
     console.log(JSON.stringify(result, null, 2));
   }
 }
