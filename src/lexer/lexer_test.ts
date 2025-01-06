@@ -2,7 +2,6 @@ import { describe, it } from "jsr:@std/testing/bdd";
 import { newToken, Token, TokenType } from "./token.ts";
 import { tokenize } from "./lexer.ts";
 import { assertEquals } from "@std/assert/equals";
-import { assertThrows } from "@std/assert/throws";
 
 describe("tokenize()", () => {
   it("should tokenize single character tokens", () => {
@@ -68,15 +67,6 @@ describe("tokenize()", () => {
     const source = " \t\n123";
     const expected: Token[] = [
       newToken(TokenType.Number, "123"),
-      newToken(TokenType.EOF, "EOF"),
-    ];
-    assertEquals(tokenize(source), expected);
-  });
-
-  it("should tokenize null keyword", () => {
-    const source = "null";
-    const expected: Token[] = [
-      newToken(TokenType.Null, "null"),
       newToken(TokenType.EOF, "EOF"),
     ];
     assertEquals(tokenize(source), expected);

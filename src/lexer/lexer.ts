@@ -4,7 +4,6 @@ import { newToken, Token, TokenType } from "./token.ts";
 /** KEYWORDS is a constant lookup for keywords and known identifiers + symbols */
 const KEYWORDS: Record<string, TokenType> = {
   let: TokenType.Let,
-  null: TokenType.Null,
 };
 
 /** tokenize receives source code and returns all the extracted tokens. Throws an error if any token is not recognized */

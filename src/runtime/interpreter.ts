@@ -1,5 +1,5 @@
 import { Program, Stmt } from "../ast/statements.ts";
-import { NullVal, NumberVal, RuntimeVal } from "./values.ts";
+import { newNull, NullVal, NumberVal, RuntimeVal } from "./values.ts";
 import { BinaryExpr, Identifier, NumericLiteral } from "../ast/expressions.ts";
 import Environment from "./environment.ts";
 
@@ -10,8 +10,6 @@ export function evaluate(astNode: Stmt, env: Environment): RuntimeVal {
       return eval_program(astNode as Program, env);
     case "NumericLiteral":
       return eval_numeric_literal(astNode as NumericLiteral);
-    case "NullLiteral":
-      return eval_null_literal();
     case "Identifier":
       return eval_identifier(astNode as Identifier, env);
     case "BinaryExpr":
@@ -29,10 +27,7 @@ export function evaluate(astNode: Stmt, env: Environment): RuntimeVal {
 }
 
 function eval_program(program: Program, env: Environment): RuntimeVal {
-  let lastEvaluated: RuntimeVal = {
-    type: "null",
-    value: null,
-  } as NullVal;
+  let lastEvaluated: RuntimeVal = newNull();
 
   for (const statement of program.body) {
     lastEvaluated = evaluate(statement, env);
@@ -50,12 +45,7 @@ function eval_numeric_literal(numericLiteral: NumericLiteral): RuntimeVal {
 }
 
 function eval_null_literal(): RuntimeVal {
-  const nullVal: NullVal = {
-    type: "null",
-    value: null,
-  };
-
-  return nullVal;
+  return newNull();
 }
 
 function eval_identifier(identifier: Identifier, env: Environment): RuntimeVal {

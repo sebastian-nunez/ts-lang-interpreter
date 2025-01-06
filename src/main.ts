@@ -1,12 +1,18 @@
 import Parser from "./parser/parser.ts";
 import Environment from "./runtime/environment.ts";
 import { evaluate } from "./runtime/interpreter.ts";
+import { newBoolean, newNull } from "./runtime/values.ts";
 
 function repl() {
   const parser = new Parser();
   const env = new Environment();
-  console.log("Repl v0.1");
 
+  // Default global environment
+  env.declareVar("true", newBoolean(true));
+  env.declareVar("false", newBoolean(false));
+  env.declareVar("null", newNull());
+
+  console.log("Repl v0.1");
   while (true) {
     const input = prompt("> ");
 

@@ -24,16 +24,6 @@ describe("Parser", () => {
     assertEquals((program.body[0] as any).value, 10);
   });
 
-  it("parses null literal expression", () => {
-    const sourceCode = "null";
-    const parser = new Parser();
-    const program = parser.produceAST(sourceCode);
-
-    assertEquals(program.body.length, 1);
-    assertEquals(program.body[0].kind, "NullLiteral");
-    assertEquals((program.body[0] as any).value, "null");
-  });
-
   it("parses simple addition expression", () => {
     const sourceCode = "5 + 3";
     const parser = new Parser();
