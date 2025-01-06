@@ -1,5 +1,5 @@
-/** NodeType represents a single node within the abstract syntax tree (AST) */
-export type NodeType =
+/** AstNode represents a single node within the abstract syntax tree (AST) */
+export type AstNode =
   | "Program"
   | "NumericLiteral"
   | "NullLiteral"
