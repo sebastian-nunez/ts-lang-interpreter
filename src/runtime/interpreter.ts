@@ -31,7 +31,7 @@ export function evaluate(astNode: Stmt, env: Environment): RuntimeVal {
 function eval_program(program: Program, env: Environment): RuntimeVal {
   let lastEvaluated: RuntimeVal = {
     type: "null",
-    value: "null",
+    value: null,
   } as NullVal;
 
   for (const statement of program.body) {
@@ -52,7 +52,7 @@ function eval_numeric_literal(numericLiteral: NumericLiteral): RuntimeVal {
 function eval_null_literal(): RuntimeVal {
   const nullVal: NullVal = {
     type: "null",
-    value: "null",
+    value: null,
   };
 
   return nullVal;
@@ -80,7 +80,7 @@ function eval_binary_expr(
   // TODO: add support for string and so forth
 
   // One or both are NULL
-  return { type: "null", value: "null" } as NullVal;
+  return { type: "null", value: null } as NullVal;
 }
 
 function eval_numeric_binary_expr(

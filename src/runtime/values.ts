@@ -9,7 +9,7 @@ export interface RuntimeVal {
 /** NullVal defines a value of undefined meaning */
 export interface NullVal extends RuntimeVal {
   type: "null";
-  value: "null";
+  value: null;
 }
 
 /** NumberVal runtime value that has access to the raw native JavasScript number type */
