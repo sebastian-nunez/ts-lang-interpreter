@@ -1,5 +1,5 @@
 /** ValueType represents the types of values encountered at runtime */
-export type ValueType = "null" | "number";
+export type ValueType = "null" | "number" | "identifier";
 
 /** RuntimeVal represents a value encountered at runtime */
 export interface RuntimeVal {

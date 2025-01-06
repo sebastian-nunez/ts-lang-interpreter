@@ -1,6 +1,6 @@
 import { Program, Stmt } from "../ast/statements.ts";
 import { NullVal, NumberVal, RuntimeVal } from "./values.ts";
-import { BinaryExpr, NumericLiteral } from "../ast/expressions.ts";
+import { BinaryExpr, Identifier, NumericLiteral } from "../ast/expressions.ts";
 import Environment from "./environment.ts";
 
 /** evaluate evaluates AST node statements into real runtime values */
@@ -12,7 +12,8 @@ export function evaluate(astNode: Stmt, env: Environment): RuntimeVal {
       return eval_numeric_literal(astNode as NumericLiteral);
     case "NullLiteral":
       return eval_null_literal();
-    // TODO: handle Identifiers
+    case "Identifier":
+      return eval_identifier(astNode as Identifier, env);
     case "BinaryExpr":
       return eval_binary_expr(astNode as BinaryExpr, env);
     default:
@@ -55,6 +56,11 @@ function eval_null_literal(): RuntimeVal {
   };
 
   return nullVal;
+}
+
+function eval_identifier(identifier: Identifier, env: Environment): RuntimeVal {
+  const val = env.lookupVar(identifier.symbol);
+  return val;
 }
 
 function eval_binary_expr(
