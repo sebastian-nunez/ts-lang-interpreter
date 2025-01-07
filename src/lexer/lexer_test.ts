@@ -43,6 +43,27 @@ describe("tokenize()", () => {
     assertEquals(tokenize(source), expected);
   });
 
+  it("should tokenize const identifier", () => {
+    const source = "const myVar";
+    const expected: Token[] = [
+      newToken(TokenType.Const, "const"),
+      newToken(TokenType.Identifier, "myVar"),
+      newToken(TokenType.EOF, "EOF"),
+    ];
+    assertEquals(tokenize(source), expected);
+  });
+
+  it("should tokenize semi colon", () => {
+    const source = "let x;";
+    const expected: Token[] = [
+      newToken(TokenType.Let, "let"),
+      newToken(TokenType.Identifier, "x"),
+      newToken(TokenType.SemiColon, ";"),
+      newToken(TokenType.EOF, "EOF"),
+    ];
+    assertEquals(tokenize(source), expected);
+  });
+
   it("should tokenize a complex expression", () => {
     const source = "let x = 10 + 5 * (2 - 1)";
     const expected: Token[] = [

@@ -6,10 +6,12 @@ export enum TokenType {
 
   // Keywords
   Let,
+  Const,
 
   // Grouping operators
   BinaryOperator,
   Equals,
+  SemiColon,
   OpenParen,
   ClosedParen,
   EOF,

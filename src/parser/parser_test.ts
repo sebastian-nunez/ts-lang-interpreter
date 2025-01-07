@@ -2,6 +2,8 @@
 import { describe, it } from "jsr:@std/testing/bdd";
 import { assertEquals } from "@std/assert";
 import Parser from "./parser.ts";
+import { VariableDeclaration } from "../ast/statements.ts";
+import { NumericLiteral } from "../ast/expressions.ts";
 
 describe("Parser", () => {
   it("parses simple identifier expression", () => {
@@ -94,5 +96,50 @@ describe("Parser", () => {
     assertEquals((expr.left as any).right.value, 5);
     assertEquals(expr.right.kind, "NumericLiteral");
     assertEquals(expr.right.value, 2);
+  });
+
+  it("parses a const variable declaration", () => {
+    const sourceCode = "const x = 2;";
+    const parser = new Parser();
+    const program = parser.produceAST(sourceCode);
+
+    assertEquals(program.body.length, 1);
+    const expr = program.body[0] as VariableDeclaration;
+    assertEquals(expr.kind, "VariableDeclaration");
+    assertEquals(expr.identifier, "x");
+    assertEquals(expr.constant, true);
+    assertEquals(expr.value, {
+      kind: "NumericLiteral",
+      value: 2,
+    } as NumericLiteral);
+  });
+
+  it("parses a let variable declaration without assignment", () => {
+    const sourceCode = "let x;";
+    const parser = new Parser();
+    const program = parser.produceAST(sourceCode);
+
+    assertEquals(program.body.length, 1);
+    const expr = program.body[0] as VariableDeclaration;
+    assertEquals(expr.kind, "VariableDeclaration");
+    assertEquals(expr.identifier, "x");
+    assertEquals(expr.constant, false);
+    assertEquals(expr.value, undefined);
+  });
+
+  it("parses a let variable declaration with assignment", () => {
+    const sourceCode = "let x = 2;";
+    const parser = new Parser();
+    const program = parser.produceAST(sourceCode);
+
+    assertEquals(program.body.length, 1);
+    const expr = program.body[0] as VariableDeclaration;
+    assertEquals(expr.kind, "VariableDeclaration");
+    assertEquals(expr.identifier, "x");
+    assertEquals(expr.constant, false);
+    assertEquals(expr.value, {
+      kind: "NumericLiteral",
+      value: 2,
+    } as NumericLiteral);
   });
 });

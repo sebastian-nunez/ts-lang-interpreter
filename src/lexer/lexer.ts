@@ -3,7 +3,9 @@ import { newToken, Token, TokenType } from "./token.ts";
 
 /** KEYWORDS is a constant lookup for keywords and known identifiers + symbols */
 const KEYWORDS: Record<string, TokenType> = {
+  // Keys are case-sensitive
   let: TokenType.Let,
+  const: TokenType.Const,
 };
 
 /** tokenize receives source code and returns all the extracted tokens. Throws an error if any token is not recognized */
@@ -27,6 +29,8 @@ export function tokenize(sourceCode: string): Token[] {
       tokens.push(newToken(TokenType.BinaryOperator, src.shift()));
     } else if (src[0] === "=") {
       tokens.push(newToken(TokenType.Equals, src.shift()));
+    } else if (src[0] === ";") {
+      tokens.push(newToken(TokenType.SemiColon, src.shift()));
     } else {
       // Handle multi-character tokens
       if (isInt(src[0])) {

@@ -1,4 +1,5 @@
 import { AstNode } from "./ast.ts";
+import { Expr } from "./expressions.ts";
 
 /**
  * Stmt statements are not resolved to a value at runtime.
@@ -16,4 +17,15 @@ export interface Stmt {
 export interface Program extends Stmt {
   kind: "Program";
   body: Stmt[];
+}
+
+/**
+ * Represents a variable declaration with or without initializing to a value.
+ * Declared variables can be mark as constant.
+ */
+export interface VariableDeclaration extends Stmt {
+  kind: "VariableDeclaration";
+  constant: boolean;
+  identifier: string;
+  value?: Expr; // Variables can be declared and initialized later (e.g. let x;)
 }

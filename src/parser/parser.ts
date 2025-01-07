@@ -4,7 +4,7 @@ import {
   Identifier,
   NumericLiteral,
 } from "../ast/expressions.ts";
-import { Program, Stmt } from "../ast/statements.ts";
+import { Program, Stmt, VariableDeclaration } from "../ast/statements.ts";
 import { tokenize } from "../lexer/lexer.ts";
 import { Token, TokenType } from "../lexer/token.ts";
 
@@ -28,9 +28,63 @@ export default class Parser {
 
   /** parse_stmt handle complex statement types */
   private parse_stmt(): Stmt {
-    // TODO: add FunctionDeclaration, TryCatch, VariableDeclaration, Loops, etc.
+    // TODO: add FunctionDeclaration, TryCatch, Loops, etc.
     // For now, skip to parse_expr
-    return this.parse_expr();
+    switch (this.at().type) {
+      case TokenType.Let:
+      case TokenType.Const:
+        return this.parse_var_declaration();
+      default:
+        return this.parse_expr();
+    }
+  }
+
+  /** parse_var_declaration parses let and const variable declarations. Variations:
+   *   - Declare: `let x;`
+   *   - Declare and initialize: `(let | const) x = expression;`
+   *  Throws errors.
+   */
+  private parse_var_declaration(): Stmt {
+    const isConstant = this.next().type === TokenType.Const;
+    const identifier = this.next_expect(
+      TokenType.Identifier,
+      "Expected identifier name following `let` or `const` keyword"
+    ).value;
+
+    if (this.at().type === TokenType.SemiColon) {
+      // Variable declaration, no assignment
+      this.next();
+      if (isConstant) {
+        throw new Error(
+          "must assign value to constant expression. No value provided"
+        );
+      }
+
+      return {
+        kind: "VariableDeclaration",
+        identifier,
+        constant: false,
+        value: undefined,
+      } as VariableDeclaration;
+    }
+
+    this.next_expect(
+      TokenType.Equals,
+      "expected equals token after variable declaration with assignment"
+    );
+
+    const declaration = {
+      kind: "VariableDeclaration",
+      identifier,
+      constant: isConstant,
+      value: this.parse_expr(),
+    } as VariableDeclaration;
+    this.next_expect(
+      TokenType.SemiColon,
+      "variable declaration statement must end with semicolon"
+    );
+
+    return declaration;
   }
 
   /**
