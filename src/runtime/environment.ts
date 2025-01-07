@@ -2,26 +2,43 @@ import { RuntimeVal } from "./values.ts";
 
 export default class Environment {
   private variables: Map<string, RuntimeVal>;
+  private constants: Set<string>;
   private parent?: Environment;
 
   constructor(parent?: Environment) {
     this.variables = new Map<string, RuntimeVal>();
+    this.constants = new Set<string>();
     this.parent = parent;
   }
 
   // declareVar declares a new environment variables. Throws an Error if the varName already exists.
-  declareVar(varName: string, value: RuntimeVal): RuntimeVal {
+  declareVar(
+    varName: string,
+    value: RuntimeVal,
+    isConstant: boolean = false
+  ): RuntimeVal {
     if (this.variables.has(varName)) {
       throw new Error(`can not declare '${varName}' since it already exists`);
     }
 
     this.variables.set(varName, value);
+    if (isConstant) {
+      this.constants.add(varName);
+    }
+
     return value;
   }
 
   // assignVar assigns an existing environment variable a new value. Throws an Error if the varName does not exist.
   assignVar(varName: string, value: RuntimeVal): RuntimeVal {
     const env = this.resolveEnv(varName); //  Throws
+
+    if (env.constants.has(varName)) {
+      throw new Error(
+        `cannot reassign to variable '${varName}' as it was declared constant`
+      );
+    }
+
     env.variables.set(varName, value);
     return value;
   }

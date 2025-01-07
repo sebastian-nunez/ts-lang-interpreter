@@ -8,9 +8,9 @@ function repl() {
   const env = new Environment();
 
   // Default global environment
-  env.declareVar("true", newBoolean(true));
-  env.declareVar("false", newBoolean(false));
-  env.declareVar("null", newNull());
+  env.declareVar("true", newBoolean(true), true);
+  env.declareVar("false", newBoolean(false), true);
+  env.declareVar("null", newNull(), true);
 
   console.log("Repl v0.1");
   while (true) {

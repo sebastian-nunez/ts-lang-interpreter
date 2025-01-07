@@ -73,12 +73,12 @@ export default class Parser {
       "expected equals token after variable declaration with assignment"
     );
 
-    const declaration = {
+    const declaration: VariableDeclaration = {
       kind: "VariableDeclaration",
       identifier,
       constant: isConstant,
       value: this.parse_expr(),
-    } as VariableDeclaration;
+    };
     this.next_expect(
       TokenType.SemiColon,
       "variable declaration statement must end with semicolon"

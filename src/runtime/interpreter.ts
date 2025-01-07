@@ -1,4 +1,4 @@
-import { Program, Stmt } from "../ast/statements.ts";
+import { Program, Stmt, VariableDeclaration } from "../ast/statements.ts";
 import { newNull, NullVal, NumberVal, RuntimeVal } from "./values.ts";
 import { BinaryExpr, Identifier, NumericLiteral } from "../ast/expressions.ts";
 import Environment from "./environment.ts";
@@ -6,8 +6,12 @@ import Environment from "./environment.ts";
 /** evaluate evaluates AST node statements into real runtime values */
 export function evaluate(astNode: Stmt, env: Environment): RuntimeVal {
   switch (astNode.kind) {
+    // Statements
     case "Program":
       return eval_program(astNode as Program, env);
+    case "VariableDeclaration":
+      return eval_var_declaration(astNode as VariableDeclaration, env);
+    // Expressions
     case "NumericLiteral":
       return eval_numeric_literal(astNode as NumericLiteral);
     case "Identifier":
@@ -35,6 +39,16 @@ function eval_program(program: Program, env: Environment): RuntimeVal {
   return lastEvaluated;
 }
 
+function eval_var_declaration(
+  declaration: VariableDeclaration,
+  env: Environment
+): RuntimeVal {
+  const value = declaration?.value
+    ? evaluate(declaration.value, env)
+    : newNull();
+  return env.declareVar(declaration.identifier, value, declaration.constant);
+}
+
 function eval_numeric_literal(numericLiteral: NumericLiteral): RuntimeVal {
   const numVal: NumberVal = {
     type: "number",
@@ -42,10 +56,6 @@ function eval_numeric_literal(numericLiteral: NumericLiteral): RuntimeVal {
   };
 
   return numVal;
-}
-
-function eval_null_literal(): RuntimeVal {
-  return newNull();
 }
 
 function eval_identifier(identifier: Identifier, env: Environment): RuntimeVal {
