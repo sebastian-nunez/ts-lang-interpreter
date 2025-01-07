@@ -1,4 +1,5 @@
 import {
+  AssignmentExpr,
   BinaryExpr,
   Expr,
   Identifier,
@@ -107,7 +108,30 @@ export default class Parser {
    */
   private parse_expr(): Expr {
     // TODO: implement
-    return this.parse_additive_expr();
+    return this.parse_assignment_expr();
+  }
+
+  /** parse_assignment_expr handles variable assignment expressions. e.g. `x = 2;` */
+  private parse_assignment_expr(): Expr {
+    const left = this.parse_additive_expr(); // TODO: switch out with parse_object_expr later
+
+    if (this.at().type === TokenType.Equals) {
+      this.next(); // Advance past `=`
+      const right = this.parse_assignment_expr();
+      this.next_expect(
+        TokenType.SemiColon,
+        "expected semicolon after variable assignment expression"
+      );
+
+      const expr: AssignmentExpr = {
+        kind: "AssignmentExpr",
+        assignee: left,
+        value: right,
+      };
+      return expr;
+    }
+
+    return left;
   }
 
   /**

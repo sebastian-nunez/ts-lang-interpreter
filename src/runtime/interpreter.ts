@@ -1,6 +1,11 @@
 import { Program, Stmt, VariableDeclaration } from "../ast/statements.ts";
 import { newNull, NullVal, NumberVal, RuntimeVal } from "./values.ts";
-import { BinaryExpr, Identifier, NumericLiteral } from "../ast/expressions.ts";
+import {
+  AssignmentExpr,
+  BinaryExpr,
+  Identifier,
+  NumericLiteral,
+} from "../ast/expressions.ts";
 import Environment from "./environment.ts";
 
 /** evaluate evaluates AST node statements into real runtime values */
@@ -18,6 +23,8 @@ export function evaluate(astNode: Stmt, env: Environment): RuntimeVal {
       return eval_identifier(astNode as Identifier, env);
     case "BinaryExpr":
       return eval_binary_expr(astNode as BinaryExpr, env);
+    case "AssignmentExpr":
+      return eval_assignment_expr(astNode as AssignmentExpr, env);
     default:
       console.error(
         `This AST node has not been setup for interpretation: ${JSON.stringify(
@@ -122,4 +129,19 @@ function eval_numeric_binary_expr(
   }
 
   return { type: "number", value: result };
+}
+
+function eval_assignment_expr(
+  expr: AssignmentExpr,
+  env: Environment
+): RuntimeVal {
+  // We can only assign values to identifiers
+  if (expr.assignee.kind !== "Identifier") {
+    throw new Error(
+      `can not assign an expression of kind '${expr.assignee.kind}' to a variable. Only identifier assignment is supported`
+    );
+  }
+
+  const identifier = expr.assignee as Identifier;
+  return env.assignVar(identifier.symbol, evaluate(expr.value, env)); // Throws
 }

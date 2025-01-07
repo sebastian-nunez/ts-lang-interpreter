@@ -3,6 +3,13 @@ import { Stmt } from "./statements.ts";
 /**  Expr unlike statements, expressions result in a value at runtime.  */
 export interface Expr extends Stmt {}
 
+/** AssignmentExpr represents a user-defined variable or symbol in source. */
+export interface AssignmentExpr extends Expr {
+  kind: "AssignmentExpr";
+  assignee: Expr; // By making it a Expr, we can do this like `x.foo = bar`
+  value: Expr;
+}
+
 /**
  * BinaryExpr is operation with two sides separated by a operator.
  * The two sides can be any "complex expression".

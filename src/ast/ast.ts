@@ -5,6 +5,7 @@ export type AstNode =
   | "VariableDeclaration"
 
   // Expressions
+  | "AssignmentExpr"
   | "NumericLiteral"
   | "Identifier"
   | "BinaryExpr"

@@ -3,7 +3,11 @@ import { describe, it } from "jsr:@std/testing/bdd";
 import { assertEquals } from "@std/assert";
 import Parser from "./parser.ts";
 import { VariableDeclaration } from "../ast/statements.ts";
-import { NumericLiteral } from "../ast/expressions.ts";
+import {
+  AssignmentExpr,
+  Identifier,
+  NumericLiteral,
+} from "../ast/expressions.ts";
 
 describe("Parser", () => {
   it("parses simple identifier expression", () => {
@@ -137,6 +141,24 @@ describe("Parser", () => {
     assertEquals(expr.kind, "VariableDeclaration");
     assertEquals(expr.identifier, "x");
     assertEquals(expr.constant, false);
+    assertEquals(expr.value, {
+      kind: "NumericLiteral",
+      value: 2,
+    } as NumericLiteral);
+  });
+
+  it("parses a let assignment", () => {
+    const sourceCode = "x = 2;";
+    const parser = new Parser();
+    const program = parser.produceAST(sourceCode);
+
+    assertEquals(program.body.length, 1);
+    const expr = program.body[0] as AssignmentExpr;
+    assertEquals(expr.kind, "AssignmentExpr");
+    assertEquals(expr.assignee, {
+      kind: "Identifier",
+      symbol: "x",
+    } as Identifier);
     assertEquals(expr.value, {
       kind: "NumericLiteral",
       value: 2,
