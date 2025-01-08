@@ -4,6 +4,8 @@ import {
   Expr,
   Identifier,
   NumericLiteral,
+  ObjectLiteral,
+  PropertyLiteral,
 } from "../ast/expressions.ts";
 import { Program, Stmt, VariableDeclaration } from "../ast/statements.ts";
 import { tokenize } from "../lexer/lexer.ts";
@@ -98,6 +100,7 @@ export default class Parser {
    *  - FunctionCall
    *  - LogicalExpr
    *  - ComparisonExpr
+   *  - ObjectExpr
    *  - AdditiveExpr
    *  - MultiplicativeExpr
    *  - UnaryExpr
@@ -113,10 +116,10 @@ export default class Parser {
 
   /** parse_assignment_expr handles variable assignment expressions. e.g. `x = 2;` */
   private parse_assignment_expr(): Expr {
-    const left = this.parse_additive_expr(); // TODO: switch out with parse_object_expr later
+    const left = this.parse_object_expr();
 
     if (this.at().type === TokenType.Equals) {
-      this.next(); // Advance past `=`
+      this.next(); // Advance past =
       const right = this.parse_assignment_expr();
       this.next_expect(
         TokenType.SemiColon,
@@ -132,6 +135,67 @@ export default class Parser {
     }
 
     return left;
+  }
+
+  /**
+   * parse_object_expr handles object creation.
+   *
+   *   - `const obj = { firstname: "Sebastian", lastname: "Nunez" }`
+   *   - `const obj = { name }`
+   */
+  private parse_object_expr(): Expr {
+    if (this.at().type !== TokenType.OpenBrace) {
+      return this.parse_additive_expr();
+    }
+
+    this.next(); // advance past '{'
+    const properties: PropertyLiteral[] = [];
+    while (!this.at_eof() && this.at().type !== TokenType.ClosedBrace) {
+      // Three cases to handle:
+      // 1. `{ key }` OR `{ key, }`
+      // 2. `{ key: value }`
+      // 3. `{key1: val1, key2: val2 }`
+
+      const key = this.next_expect(
+        TokenType.Identifier,
+        "object literal key expected"
+      ).value;
+
+      if (this.at().type == TokenType.Comma) {
+        // Allows shorthand key: { key, }
+        this.next(); // advance past comma
+        properties.push({ kind: "PropertyLiteral", key });
+        continue;
+      } else if (this.at().type == TokenType.ClosedBrace) {
+        // Allows shorthand key: { key }
+        properties.push({ kind: "PropertyLiteral", key });
+        continue;
+      }
+
+      // { key: val }
+      this.next_expect(
+        TokenType.Colon,
+        "missing colon following identifier in ObjectExpr"
+      );
+      const value = this.parse_expr();
+
+      properties.push({ kind: "PropertyLiteral", value, key });
+      if (this.at().type != TokenType.ClosedBrace) {
+        this.next_expect(
+          TokenType.Comma,
+          "expected comma or closing bracket following property"
+        );
+      }
+    }
+
+    this.next_expect(
+      TokenType.ClosedBrace,
+      "expected a closing brace at the end of an object expression"
+    );
+    return {
+      kind: "ObjectLiteral",
+      properties,
+    } as ObjectLiteral;
   }
 
   /**

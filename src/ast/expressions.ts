@@ -35,4 +35,17 @@ export interface NumericLiteral extends Expr {
   value: number;
 }
 
+/** PropertyLiteral represents a property of an object within the source code. e.g. `person.firstname` */
+export interface PropertyLiteral extends Expr {
+  kind: "PropertyLiteral";
+  key: string;
+  value?: Expr; // Allow short-hand declarations. e.g. `{ key: key }` === `{ key }`
+}
+
+/** ObjectLiteral represents an object within the source code. e.g. `const person = { firstname: "Sebastian" }` */
+export interface ObjectLiteral extends Expr {
+  kind: "ObjectLiteral";
+  properties: PropertyLiteral[];
+}
+
 // TODO: implement UnaryExpr, CallExpr

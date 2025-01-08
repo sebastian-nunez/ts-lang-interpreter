@@ -54,11 +54,37 @@ describe("tokenize()", () => {
   });
 
   it("should tokenize semi colon", () => {
-    const source = "let x;";
+    const source = ";";
     const expected: Token[] = [
-      newToken(TokenType.Let, "let"),
-      newToken(TokenType.Identifier, "x"),
       newToken(TokenType.SemiColon, ";"),
+      newToken(TokenType.EOF, "EOF"),
+    ];
+    assertEquals(tokenize(source), expected);
+  });
+
+  it("should tokenize colon", () => {
+    const source = ":";
+    const expected: Token[] = [
+      newToken(TokenType.Colon, ":"),
+      newToken(TokenType.EOF, "EOF"),
+    ];
+    assertEquals(tokenize(source), expected);
+  });
+
+  it("should tokenize comma", () => {
+    const source = ",";
+    const expected: Token[] = [
+      newToken(TokenType.Comma, ","),
+      newToken(TokenType.EOF, "EOF"),
+    ];
+    assertEquals(tokenize(source), expected);
+  });
+
+  it("should tokenize open and close braces", () => {
+    const source = "{}";
+    const expected: Token[] = [
+      newToken(TokenType.OpenBrace, "{"),
+      newToken(TokenType.ClosedBrace, "}"),
       newToken(TokenType.EOF, "EOF"),
     ];
     assertEquals(tokenize(source), expected);

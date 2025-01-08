@@ -1,4 +1,4 @@
-import { RuntimeVal } from "./values.ts";
+import { newBoolean, newNull, RuntimeVal } from "./values.ts";
 
 export default class Environment {
   private variables: Map<string, RuntimeVal>;
@@ -64,4 +64,16 @@ export default class Environment {
 
     return this.parent?.resolveEnv(varName);
   }
+}
+
+/** createGlobalEnv creates an environment with the language-specific global variables declared */
+export function createGlobalEnv(): Environment {
+  const env = new Environment();
+
+  // Default global environment
+  env.declareVar("true", newBoolean(true), true);
+  env.declareVar("false", newBoolean(false), true);
+  env.declareVar("null", newNull(), true);
+
+  return env;
 }

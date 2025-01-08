@@ -11,7 +11,11 @@ export enum TokenType {
   // Grouping operators
   BinaryOperator,
   Equals,
+  Comma,
+  Colon,
   SemiColon,
+  OpenBrace,
+  ClosedBrace,
   OpenParen,
   ClosedParen,
   EOF,

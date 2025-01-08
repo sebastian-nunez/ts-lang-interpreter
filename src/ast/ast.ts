@@ -7,6 +7,8 @@ export type AstNode =
   // Expressions
   | "AssignmentExpr"
   | "NumericLiteral"
+  | "ObjectLiteral"
+  | "PropertyLiteral"
   | "Identifier"
   | "BinaryExpr"
   | "UnaryExpr"

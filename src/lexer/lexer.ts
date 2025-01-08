@@ -19,6 +19,10 @@ export function tokenize(sourceCode: string): Token[] {
       tokens.push(newToken(TokenType.OpenParen, src.shift()));
     } else if (src[0] === ")") {
       tokens.push(newToken(TokenType.ClosedParen, src.shift()));
+    } else if (src[0] === "{") {
+      tokens.push(newToken(TokenType.OpenBrace, src.shift()));
+    } else if (src[0] === "}") {
+      tokens.push(newToken(TokenType.ClosedBrace, src.shift()));
     } else if (
       src[0] === "+" ||
       src[0] === "-" ||
@@ -31,6 +35,10 @@ export function tokenize(sourceCode: string): Token[] {
       tokens.push(newToken(TokenType.Equals, src.shift()));
     } else if (src[0] === ";") {
       tokens.push(newToken(TokenType.SemiColon, src.shift()));
+    } else if (src[0] === ":") {
+      tokens.push(newToken(TokenType.Colon, src.shift()));
+    } else if (src[0] === ",") {
+      tokens.push(newToken(TokenType.Comma, src.shift()));
     } else {
       // Handle multi-character tokens
       if (isInt(src[0])) {

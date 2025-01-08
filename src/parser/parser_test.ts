@@ -7,6 +7,8 @@ import {
   AssignmentExpr,
   Identifier,
   NumericLiteral,
+  ObjectLiteral,
+  PropertyLiteral,
 } from "../ast/expressions.ts";
 
 describe("Parser", () => {
@@ -163,5 +165,77 @@ describe("Parser", () => {
       kind: "NumericLiteral",
       value: 2,
     } as NumericLiteral);
+  });
+
+  it("parses a simple shorthand object expression", () => {
+    const sourceCode = "{ x }";
+    const parser = new Parser();
+    const program = parser.produceAST(sourceCode);
+
+    assertEquals(program.body.length, 1);
+    const expr = program.body[0] as ObjectLiteral;
+    assertEquals(expr.kind, "ObjectLiteral");
+    assertEquals(expr.properties[0], {
+      kind: "PropertyLiteral",
+      key: "x",
+    } as PropertyLiteral);
+  });
+
+  it("parses a simple shorthand object expression ending in comma", () => {
+    const sourceCode = "{ x, }";
+    const parser = new Parser();
+    const program = parser.produceAST(sourceCode);
+
+    assertEquals(program.body.length, 1);
+    const expr = program.body[0] as ObjectLiteral;
+    assertEquals(expr.kind, "ObjectLiteral");
+    assertEquals(expr.properties[0], {
+      kind: "PropertyLiteral",
+      key: "x",
+    } as PropertyLiteral);
+  });
+
+  it("parses a simple object expression with value", () => {
+    const sourceCode = "{ x: 2 }";
+    const parser = new Parser();
+    const program = parser.produceAST(sourceCode);
+
+    assertEquals(program.body.length, 1);
+    const expr = program.body[0] as ObjectLiteral;
+    assertEquals(expr.kind, "ObjectLiteral");
+    assertEquals(expr.properties[0], {
+      kind: "PropertyLiteral",
+      key: "x",
+      value: {
+        kind: "NumericLiteral",
+        value: 2,
+      } as NumericLiteral,
+    } as PropertyLiteral);
+  });
+
+  it("parses a simple object expression with multiple keys and values", () => {
+    const sourceCode = "{ x: 2, y: 1 }";
+    const parser = new Parser();
+    const program = parser.produceAST(sourceCode);
+
+    assertEquals(program.body.length, 1);
+    const expr = program.body[0] as ObjectLiteral;
+    assertEquals(expr.kind, "ObjectLiteral");
+    assertEquals(expr.properties[0], {
+      kind: "PropertyLiteral",
+      key: "x",
+      value: {
+        kind: "NumericLiteral",
+        value: 2,
+      } as NumericLiteral,
+    } as PropertyLiteral);
+    assertEquals(expr.properties[1], {
+      kind: "PropertyLiteral",
+      key: "y",
+      value: {
+        kind: "NumericLiteral",
+        value: 1,
+      } as NumericLiteral,
+    } as PropertyLiteral);
   });
 });
