@@ -1,5 +1,3 @@
-import { PropertyLiteral } from "../ast/expressions.ts";
-
 /** ValueType represents the types of values encountered at runtime */
 export type ValueType = "null" | "number" | "boolean" | "object";
 
