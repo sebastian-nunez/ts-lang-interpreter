@@ -1,5 +1,7 @@
+import { PropertyLiteral } from "../ast/expressions.ts";
+
 /** ValueType represents the types of values encountered at runtime */
-export type ValueType = "null" | "number" | "boolean";
+export type ValueType = "null" | "number" | "boolean" | "object";
 
 /** RuntimeVal represents a value encountered at runtime */
 export interface RuntimeVal {
@@ -39,5 +41,19 @@ export function newBoolean(value: boolean = true): BooleanVal {
   return {
     type: "boolean",
     value,
+  };
+}
+
+/** ObjectVal runtime value that has access to the raw native JavasScript object type */
+export interface ObjectVal extends RuntimeVal {
+  type: "object";
+  properties: Map<string, RuntimeVal>;
+}
+export function newObject(
+  properties = new Map<string, RuntimeVal>()
+): ObjectVal {
+  return {
+    type: "object",
+    properties,
   };
 }

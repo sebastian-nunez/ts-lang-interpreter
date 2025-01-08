@@ -1,10 +1,17 @@
 import { Program, Stmt, VariableDeclaration } from "../ast/statements.ts";
-import { newNull, NullVal, NumberVal, RuntimeVal } from "./values.ts";
+import {
+  newNull,
+  newObject,
+  NullVal,
+  NumberVal,
+  RuntimeVal,
+} from "./values.ts";
 import {
   AssignmentExpr,
   BinaryExpr,
   Identifier,
   NumericLiteral,
+  ObjectLiteral,
 } from "../ast/expressions.ts";
 import Environment from "./environment.ts";
 
@@ -21,6 +28,8 @@ export function evaluate(astNode: Stmt, env: Environment): RuntimeVal {
       return eval_numeric_literal(astNode as NumericLiteral);
     case "Identifier":
       return eval_identifier(astNode as Identifier, env);
+    case "ObjectLiteral":
+      return eval_object_expr(astNode as ObjectLiteral, env);
     case "BinaryExpr":
       return eval_binary_expr(astNode as BinaryExpr, env);
     case "AssignmentExpr":
@@ -68,6 +77,21 @@ function eval_numeric_literal(numericLiteral: NumericLiteral): RuntimeVal {
 function eval_identifier(identifier: Identifier, env: Environment): RuntimeVal {
   const val = env.lookupVar(identifier.symbol);
   return val;
+}
+
+function eval_object_expr(obj: ObjectLiteral, env: Environment): RuntimeVal {
+  const objVal = newObject();
+
+  for (const { key, value } of obj.properties) {
+    const runtimeVal =
+      value === undefined // Shorthand was used `{ foo }` same as `{ foo: foo }`. So we expect, `foo` to be defined.
+        ? env.lookupVar(key)
+        : evaluate(value, env);
+
+    objVal.properties.set(key, runtimeVal);
+  }
+
+  return objVal;
 }
 
 function eval_binary_expr(

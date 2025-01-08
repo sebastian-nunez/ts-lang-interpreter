@@ -20,7 +20,7 @@ function repl() {
 
     console.log("----- Evaluated result -----");
     const result = evaluate(program, env);
-    console.log(JSON.stringify(result, null, 2));
+    console.log(result);
   }
 }
 

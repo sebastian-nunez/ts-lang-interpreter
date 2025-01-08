@@ -39,7 +39,7 @@ export interface NumericLiteral extends Expr {
 export interface PropertyLiteral extends Expr {
   kind: "PropertyLiteral";
   key: string;
-  value?: Expr; // Allow short-hand declarations. e.g. `{ key: key }` === `{ key }`
+  value?: Expr; // Allow short-hand declarations. e.g. `{ key: key }` ~ `{ key }`
 }
 
 /** ObjectLiteral represents an object within the source code. e.g. `const person = { firstname: "Sebastian" }` */
