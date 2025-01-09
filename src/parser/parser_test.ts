@@ -5,7 +5,10 @@ import Parser from "./parser.ts";
 import { VariableDeclaration } from "../ast/statements.ts";
 import {
   AssignmentExpr,
+  CallExpr,
+  Expr,
   Identifier,
+  MemberExpr,
   NumericLiteral,
   ObjectLiteral,
   PropertyLiteral,
@@ -237,5 +240,242 @@ describe("Parser", () => {
         value: 1,
       } as NumericLiteral,
     } as PropertyLiteral);
+  });
+
+  it("parses a simple member access on an object", () => {
+    const sourceCode = "obj.foo";
+    const parser = new Parser();
+    const program = parser.produceAST(sourceCode);
+
+    assertEquals(program.body.length, 1);
+    const expr = program.body[0] as MemberExpr;
+    assertEquals(expr.kind, "MemberExpr");
+    assertEquals(expr.object, {
+      kind: "Identifier",
+      symbol: "obj",
+    } as Identifier);
+    assertEquals(expr.property, {
+      kind: "Identifier",
+      symbol: "foo",
+    } as Identifier);
+    assertEquals(expr.isComputed, false);
+  });
+
+  it("parses nested member access on an object", () => {
+    const sourceCode = "obj.foo.bar";
+    const parser = new Parser();
+    const program = parser.produceAST(sourceCode);
+
+    assertEquals(program.body.length, 1);
+    const expr = program.body[0] as MemberExpr;
+    assertEquals(expr.kind, "MemberExpr");
+    assertEquals(expr.property, {
+      kind: "Identifier",
+      symbol: "bar",
+    } as Identifier);
+    assertEquals(expr.object, {
+      kind: "MemberExpr",
+      object: {
+        kind: "Identifier",
+        symbol: "obj",
+      } as Identifier,
+      property: {
+        kind: "Identifier",
+        symbol: "foo",
+      } as Identifier,
+      isComputed: false,
+    } as MemberExpr);
+    assertEquals(expr.isComputed, false);
+  });
+
+  it("parses a basic function call without args", () => {
+    const sourceCode = "func()";
+    const parser = new Parser();
+    const program = parser.produceAST(sourceCode);
+
+    assertEquals(program.body.length, 1);
+    const expr = program.body[0] as CallExpr;
+    assertEquals(expr.kind, "CallExpr");
+    assertEquals(expr.caller, {
+      kind: "Identifier",
+      symbol: "func",
+    } as Identifier);
+    assertEquals(expr.args, []);
+  });
+
+  it("parses a basic function call with a single arg", () => {
+    const sourceCode = "func(1)";
+    const parser = new Parser();
+    const program = parser.produceAST(sourceCode);
+
+    assertEquals(program.body.length, 1);
+    const expr = program.body[0] as CallExpr;
+    assertEquals(expr.kind, "CallExpr");
+    assertEquals(expr.caller, {
+      kind: "Identifier",
+      symbol: "func",
+    } as Identifier);
+    assertEquals(expr.args, [
+      {
+        kind: "NumericLiteral",
+        value: 1,
+      } as NumericLiteral,
+    ]);
+  });
+
+  it("parses a basic function call with multiple args", () => {
+    const sourceCode = "func(1, 2, 3)";
+    const parser = new Parser();
+    const program = parser.produceAST(sourceCode);
+
+    assertEquals(program.body.length, 1);
+    const expr = program.body[0] as CallExpr;
+    assertEquals(expr.kind, "CallExpr");
+    assertEquals(expr.caller, {
+      kind: "Identifier",
+      symbol: "func",
+    } as Identifier);
+    assertEquals(expr.args, [
+      {
+        kind: "NumericLiteral",
+        value: 1,
+      } as NumericLiteral,
+      {
+        kind: "NumericLiteral",
+        value: 2,
+      } as NumericLiteral,
+      {
+        kind: "NumericLiteral",
+        value: 3,
+      } as NumericLiteral,
+    ]);
+  });
+
+  it("parses a function call on a member expression", () => {
+    const sourceCode = "obj.func()";
+    const parser = new Parser();
+    const program = parser.produceAST(sourceCode);
+
+    assertEquals(program.body.length, 1);
+    const expr = program.body[0] as CallExpr;
+    assertEquals(expr.kind, "CallExpr");
+    assertEquals(expr.caller, {
+      kind: "MemberExpr",
+      object: {
+        kind: "Identifier",
+        symbol: "obj",
+      } as Identifier,
+      property: {
+        kind: "Identifier",
+        symbol: "func",
+      } as Identifier,
+      isComputed: false,
+    } as MemberExpr);
+    assertEquals(expr.args, []);
+  });
+
+  it("parses a function call on a member expression with simple args", () => {
+    const sourceCode = "obj.func(1, 2)";
+    const parser = new Parser();
+    const program = parser.produceAST(sourceCode);
+
+    assertEquals(program.body.length, 1);
+    const expr = program.body[0] as CallExpr;
+    assertEquals(expr.kind, "CallExpr");
+    assertEquals(expr.caller, {
+      kind: "MemberExpr",
+      object: {
+        kind: "Identifier",
+        symbol: "obj",
+      } as Identifier,
+      property: {
+        kind: "Identifier",
+        symbol: "func",
+      } as Identifier,
+      isComputed: false,
+    } as MemberExpr);
+    assertEquals(expr.args, [
+      {
+        kind: "NumericLiteral",
+        value: 1,
+      } as NumericLiteral,
+      {
+        kind: "NumericLiteral",
+        value: 2,
+      } as NumericLiteral,
+    ]);
+  });
+
+  it("parses a function call on a member expression with function arg", () => {
+    const sourceCode = "obj.func(bar())";
+    const parser = new Parser();
+    const program = parser.produceAST(sourceCode);
+
+    assertEquals(program.body.length, 1);
+    const expr = program.body[0] as CallExpr;
+    assertEquals(expr.kind, "CallExpr");
+    assertEquals(expr.caller, {
+      kind: "MemberExpr",
+      object: {
+        kind: "Identifier",
+        symbol: "obj",
+      } as Identifier,
+      property: {
+        kind: "Identifier",
+        symbol: "func",
+      } as Identifier,
+      isComputed: false,
+    } as MemberExpr);
+    assertEquals(expr.args, [
+      {
+        kind: "CallExpr",
+        caller: {
+          kind: "Identifier",
+          symbol: "bar",
+        } as Identifier,
+        args: [],
+      } as CallExpr,
+    ]);
+  });
+
+  it("parses a function call on a member expression with complex function arg", () => {
+    const sourceCode = "obj.func(bar(1, 2))";
+    const parser = new Parser();
+    const program = parser.produceAST(sourceCode);
+
+    assertEquals(program.body.length, 1);
+    const expr = program.body[0] as CallExpr;
+    assertEquals(expr.kind, "CallExpr");
+    assertEquals(expr.caller, {
+      kind: "MemberExpr",
+      object: {
+        kind: "Identifier",
+        symbol: "obj",
+      } as Identifier,
+      property: {
+        kind: "Identifier",
+        symbol: "func",
+      } as Identifier,
+      isComputed: false,
+    } as MemberExpr);
+    assertEquals(expr.args, [
+      {
+        kind: "CallExpr",
+        caller: {
+          kind: "Identifier",
+          symbol: "bar",
+        } as Identifier,
+        args: [
+          {
+            kind: "NumericLiteral",
+            value: 1,
+          } as NumericLiteral,
+          {
+            kind: "NumericLiteral",
+            value: 2,
+          } as NumericLiteral,
+        ],
+      } as CallExpr,
+    ]);
   });
 });
