@@ -6,6 +6,7 @@ export type AstNode =
 
   // Expressions
   | "AssignmentExpr"
+  | "MemberExpr"
   | "NumericLiteral"
   | "ObjectLiteral"
   | "PropertyLiteral"

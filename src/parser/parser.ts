@@ -1,8 +1,10 @@
 import {
   AssignmentExpr,
   BinaryExpr,
+  CallExpr,
   Expr,
   Identifier,
+  MemberExpr,
   NumericLiteral,
   ObjectLiteral,
   PropertyLiteral,
@@ -96,13 +98,14 @@ export default class Parser {
    * Orders of precedence (from lowest to highest):
    *
    *  - AssignmentExpr
-   *  - MemberExpr
-   *  - FunctionCall
+   *  - ObjectExpr
    *  - LogicalExpr
    *  - ComparisonExpr
-   *  - ObjectExpr
    *  - AdditiveExpr
    *  - MultiplicativeExpr
+   *  - MemberCallExpr
+   *  - CallExpr
+   *  - MemberExpr
    *  - UnaryExpr
    *  - PrimaryExpr
    *
@@ -226,7 +229,7 @@ export default class Parser {
 
   /** parse_multiplicative_expr handles multiplication, division & modulo operations */
   private parse_multiplicative_expr(): Expr {
-    let left = this.parse_primary_expr();
+    let left = this.parse_call_member_expr();
 
     while (
       this.at().value === "/" ||
@@ -234,7 +237,7 @@ export default class Parser {
       this.at().value === "%"
     ) {
       const operator = this.next().value;
-      const right = this.parse_primary_expr();
+      const right = this.parse_call_member_expr();
 
       // Keep parsing the left side recursively
       const expr: BinaryExpr = {
@@ -247,6 +250,127 @@ export default class Parser {
     }
 
     return left;
+  }
+
+  /**
+   * parse_call_member_expr parses function call on an object with a member function
+   * (e.g. `foo.Func()`). Allows us to recursively evaluate member expressions.
+   *
+   * Throws errors.
+   */
+  private parse_call_member_expr(): Expr {
+    // foo.X () --> evaluate foo.X part
+    const member = this.parse_member_access_expr();
+
+    if (this.at().type === TokenType.OpenParen) {
+      // Function call needed
+      return this.parse_call_expr(member);
+    }
+
+    return member; // Just a member evaluation was needed: foo.X
+  }
+
+  /** parse_call_expr parses a call expression. Throws errors. */
+  private parse_call_expr(caller: Expr): Expr {
+    let callExpr: CallExpr = {
+      kind: "CallExpr",
+      caller,
+      args: this.parse_function_call_args(),
+    };
+
+    // Recursively evaluate call expressions e.g. foo.Func1()() where Func1 returns a function to call.
+    // Effectively, we can now chain the function calls.
+    if (this.at().type == TokenType.OpenParen) {
+      callExpr = this.parse_call_expr(callExpr) as CallExpr;
+    }
+
+    return callExpr;
+  }
+
+  /** parse_function_call_args parses arguments of function call. Throws errors. */
+  private parse_function_call_args(): Expr[] {
+    this.next_expect(
+      TokenType.OpenParen,
+      "expected open parenthesis when parsing function arguments"
+    );
+
+    const args: Expr[] =
+      this.at().type === TokenType.ClosedParen
+        ? [] // We have something like `func()` so no args
+        : this.helper_parse_args_list();
+
+    this.next_expect(
+      TokenType.ClosedParen,
+      "expected closed parenthesis after function arguments"
+    );
+    return args;
+  }
+
+  /** helper_parse_args_list is a helper function for parse_function_call_args. */
+  private helper_parse_args_list(): Expr[] {
+    // We can to allow something like `foo(x = 5, y = "Bar")` where we can assign variables THEN get their values as args.
+    // This would first set `x = 5` and `y = "Bar"` in the outer scope.
+    const args = [this.parse_assignment_expr()];
+
+    // We are parsing a comma separated arguments list e.g. func(arg1, arg2, ...)
+    // However, we already parsed `arg1` and should be at a comma
+    while (this.at().type == TokenType.Comma && this.next()) {
+      args.push(this.parse_assignment_expr());
+    }
+
+    return args;
+  }
+
+  /**
+   * parse_member_access_expr parses a member access expression on an object.
+   *
+   * Member access can be either through the:
+   *   - "Dot notation": `foo.bar`
+   *   - "Bracket notation": `foo["bar"]` or `foo[ComputedVal()]`
+   *
+   * When using the "bracket notation", there is the possibility to have an inner
+   * "computed" value (e.g. `foo[ComputedVal()]`, where `ComputedVal()` returns the key to be indexed.)
+   *
+   * Throws errors.
+   */
+  private parse_member_access_expr(): Expr {
+    let obj = this.parse_primary_expr();
+
+    while (
+      this.at().type === TokenType.Dot ||
+      this.at().type === TokenType.OpenBracket
+    ) {
+      const operator = this.next(); // "." or "["
+      const isComputed = operator.type === TokenType.OpenBracket;
+      let property: Expr; // Member being access
+
+      if (isComputed) {
+        // this allows obj[ComputedValue()]
+        property = this.parse_expr(); // Inner value must be computed first
+
+        this.next_expect(
+          TokenType.ClosedBracket,
+          "missing closing bracket in computed value"
+        );
+      } else {
+        // non-computed values aka foo.Bar
+        property = this.parse_primary_expr(); // for `foo.Bar` get the "Bar"
+
+        // We need to verify the items parsed, form a valid identifier
+        if (property.kind !== "Identifier") {
+          throw `can not use dot operator without right hand side being a identifier`;
+        }
+      }
+
+      obj = {
+        kind: "MemberExpr",
+        object: obj,
+        property,
+        isComputed,
+      } as MemberExpr;
+    }
+
+    return obj;
   }
 
   /** parse_primary_expr parse literal values & grouping expressions. Throws errors. */

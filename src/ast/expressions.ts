@@ -10,6 +10,21 @@ export interface AssignmentExpr extends Expr {
   value: Expr;
 }
 
+/** MemberExpr represents an object member within the source-code. */
+export interface MemberExpr extends Expr {
+  kind: "MemberExpr";
+  object: Expr; // foo
+  property: Expr; // foo.bar() the "bar()"
+  isComputed: boolean; // foo["bar"](), foo[getKey()]()
+}
+
+/** CallExpr represents a function call within the source-code. */
+export interface CallExpr extends Expr {
+  kind: "CallExpr";
+  caller: Expr; // Allows members expressions with functions e.g. `foo.Function()` to work
+  args: Expr[]; // func(arg1, arg2, ...)
+}
+
 /**
  * BinaryExpr is operation with two sides separated by a operator.
  * The two sides can be any "complex expression".
