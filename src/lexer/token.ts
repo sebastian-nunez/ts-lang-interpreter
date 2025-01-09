@@ -3,6 +3,7 @@ export enum TokenType {
   // Literal Types
   Number,
   Identifier,
+  String,
 
   // Keywords
   Let,

@@ -8,6 +8,7 @@ export type AstNode =
   | "AssignmentExpr"
   | "MemberExpr"
   | "NumericLiteral"
+  | "StringLiteral"
   | "ObjectLiteral"
   | "PropertyLiteral"
   | "Identifier"

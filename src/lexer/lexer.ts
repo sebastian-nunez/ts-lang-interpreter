@@ -45,6 +45,17 @@ export function tokenize(sourceCode: string): Token[] {
       tokens.push(newToken(TokenType.Comma, src.shift()));
     } else if (src[0] === ".") {
       tokens.push(newToken(TokenType.Dot, src.shift()));
+    } else if (src[0] === '"') {
+      src.shift(); // Consume open quotation
+
+      // TODO: add escape sequence support
+      const strArr = [];
+      while (src.length > 0 && src[0] !== '"') {
+        strArr.push(src.shift());
+      }
+
+      src.shift(); // Consume close quotation
+      tokens.push(newToken(TokenType.String, strArr.join("")));
     } else {
       // Handle multi-character tokens
       if (isInt(src[0])) {
@@ -54,10 +65,11 @@ export function tokenize(sourceCode: string): Token[] {
         }
         tokens.push(newToken(TokenType.Number, num));
       } else if (isAlpha(src[0])) {
-        let identifier = "";
+        const identifierArr = [];
         while (src.length > 0 && isAlpha(src[0])) {
-          identifier += src.shift();
+          identifierArr.push(src.shift());
         }
+        const identifier = identifierArr.join("");
 
         // TokenType is an enum, so values are represented as numbers
         const reservedToken = KEYWORDS[identifier];

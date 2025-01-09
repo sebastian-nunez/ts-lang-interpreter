@@ -11,6 +11,7 @@ import {
   NumericLiteral,
   ObjectLiteral,
   PropertyLiteral,
+  StringLiteral,
 } from "../ast/expressions.ts";
 
 describe("Parser", () => {
@@ -32,6 +33,16 @@ describe("Parser", () => {
     assertEquals(program.body.length, 1);
     assertEquals(program.body[0].kind, "NumericLiteral");
     assertEquals((program.body[0] as any).value, 10);
+  });
+
+  it("parses string literal expression", () => {
+    const sourceCode = `"hello, this is a string!"`;
+    const parser = new Parser();
+    const program = parser.produceAST(sourceCode);
+
+    assertEquals(program.body.length, 1);
+    assertEquals(program.body[0].kind, "StringLiteral");
+    assertEquals((program.body[0] as any).value, "hello, this is a string!");
   });
 
   it("parses simple addition expression", () => {
@@ -120,6 +131,22 @@ describe("Parser", () => {
       kind: "NumericLiteral",
       value: 2,
     } as NumericLiteral);
+  });
+
+  it("parses a const variable declaration with a string", () => {
+    const sourceCode = `const x = "some string";`;
+    const parser = new Parser();
+    const program = parser.produceAST(sourceCode);
+
+    assertEquals(program.body.length, 1);
+    const expr = program.body[0] as VariableDeclaration;
+    assertEquals(expr.kind, "VariableDeclaration");
+    assertEquals(expr.identifier, "x");
+    assertEquals(expr.constant, true);
+    assertEquals(expr.value, {
+      kind: "StringLiteral",
+      value: "some string",
+    } as StringLiteral);
   });
 
   it("parses a let variable declaration without assignment", () => {

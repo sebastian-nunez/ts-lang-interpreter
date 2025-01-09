@@ -109,6 +109,24 @@ describe("tokenize()", () => {
     assertEquals(tokenize(source), expected);
   });
 
+  it("should tokenize a simple string", () => {
+    const source = `"some string!"`;
+    const expected: Token[] = [
+      newToken(TokenType.String, "some string!"),
+      newToken(TokenType.EOF, "EOF"),
+    ];
+    assertEquals(tokenize(source), expected);
+  });
+
+  it("should tokenize an empty string", () => {
+    const source = `""`;
+    const expected: Token[] = [
+      newToken(TokenType.String, ""),
+      newToken(TokenType.EOF, "EOF"),
+    ];
+    assertEquals(tokenize(source), expected);
+  });
+
   it("should tokenize a complex expression", () => {
     const source = "let x = 10 + 5 * (2 - 1)";
     const expected: Token[] = [

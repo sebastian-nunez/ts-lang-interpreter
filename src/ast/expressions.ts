@@ -50,6 +50,12 @@ export interface NumericLiteral extends Expr {
   value: number;
 }
 
+/** StringLiteral represents a string constant inside the source code. */
+export interface StringLiteral extends Expr {
+  kind: "StringLiteral";
+  value: string;
+}
+
 /** PropertyLiteral represents a property of an object within the source code. e.g. `person.firstname` */
 export interface PropertyLiteral extends Expr {
   kind: "PropertyLiteral";

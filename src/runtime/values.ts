@@ -1,7 +1,13 @@
 import Environment from "./environment.ts";
 
 /** ValueType represents the types of values encountered at runtime */
-export type ValueType = "null" | "number" | "boolean" | "object" | "nativeFn";
+export type ValueType =
+  | "null"
+  | "number"
+  | "string"
+  | "boolean"
+  | "object"
+  | "nativeFn";
 
 /** RuntimeVal represents a value encountered at runtime */
 export interface RuntimeVal {
@@ -20,7 +26,7 @@ export function newNull(): NullVal {
   };
 }
 
-/** NumberVal runtime value that has access to the raw native JavasScript number type */
+/** NumberVal runtime value that has access to the raw native JavaScript number type */
 export interface NumberVal extends RuntimeVal {
   type: "number";
   value: number;
@@ -32,7 +38,19 @@ export function newNumber(value: number = 0): NumberVal {
   };
 }
 
-/** BooleanVal runtime value that has access to the raw native JavasScript boolean type */
+/** StringVal runtime value that has access to the raw native JavaScript string type */
+export interface StringVal extends RuntimeVal {
+  type: "string";
+  value: string;
+}
+export function newString(value: string = ""): StringVal {
+  return {
+    type: "string",
+    value,
+  };
+}
+
+/** BooleanVal runtime value that has access to the raw native JavaScript boolean type */
 export interface BooleanVal extends RuntimeVal {
   type: "boolean";
   value: boolean;

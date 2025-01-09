@@ -6,6 +6,7 @@ import {
   NullVal,
   NumberVal,
   RuntimeVal,
+  StringVal,
 } from "./values.ts";
 import {
   AssignmentExpr,
@@ -14,6 +15,7 @@ import {
   Identifier,
   NumericLiteral,
   ObjectLiteral,
+  StringLiteral,
 } from "../ast/expressions.ts";
 import Environment from "./environment.ts";
 
@@ -28,6 +30,8 @@ export function evaluate(astNode: Stmt, env: Environment): RuntimeVal {
     // Expressions
     case "NumericLiteral":
       return eval_numeric_literal(astNode as NumericLiteral);
+    case "StringLiteral":
+      return eval_string_literal(astNode as StringLiteral);
     case "Identifier":
       return eval_identifier(astNode as Identifier, env);
     case "ObjectLiteral":
@@ -77,6 +81,14 @@ function eval_numeric_literal(numericLiteral: NumericLiteral): RuntimeVal {
   };
 
   return numVal;
+}
+
+function eval_string_literal(str: StringLiteral): RuntimeVal {
+  const strVal: StringVal = {
+    type: "string",
+    value: str.value,
+  };
+  return strVal;
 }
 
 function eval_identifier(identifier: Identifier, env: Environment): RuntimeVal {

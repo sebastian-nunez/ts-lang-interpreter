@@ -8,6 +8,7 @@ import {
   NumericLiteral,
   ObjectLiteral,
   PropertyLiteral,
+  StringLiteral,
 } from "../ast/expressions.ts";
 import { Program, Stmt, VariableDeclaration } from "../ast/statements.ts";
 import { tokenize } from "../lexer/lexer.ts";
@@ -399,6 +400,13 @@ export default class Parser {
           value,
         };
         return number;
+      }
+      case TokenType.String: {
+        const str: StringLiteral = {
+          kind: "StringLiteral",
+          value: this.next().value,
+        };
+        return str;
       }
       case TokenType.OpenParen: {
         // Open parenthesis, indicates we have another inner expression to evaluate
