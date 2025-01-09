@@ -168,23 +168,20 @@ function eval_numeric_binary_expr(
       break;
     case "/":
       if (rhs.value === 0) {
-        console.error("Interpreter error: division by zero");
-        Deno.exit(1);
+        throw new Error("Interpreter error: division by zero");
       }
 
       result = lhs.value / rhs.value;
       break;
     case "%":
       if (rhs.value === 0) {
-        console.error("Interpreter error: division by zero");
-        Deno.exit(1);
+        throw new Error("Interpreter error: division by zero");
       }
 
       result = lhs.value % rhs.value;
       break;
     default:
-      console.error(`Interpreter error: Unknown operator -> '${operator}'`);
-      Deno.exit(1);
+      throw new Error(`Interpreter error: Unknown operator -> '${operator}'`);
   }
 
   return { type: "number", value: result };

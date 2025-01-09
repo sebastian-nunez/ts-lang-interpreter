@@ -1,7 +1,13 @@
 import { describe, it } from "jsr:@std/testing/bdd";
-import { assertEquals, assertThrows } from "@std/assert";
-import Environment from "./environment.ts";
-import { NumberVal } from "./values.ts";
+import { assertEquals, assertGreaterOrEqual, assertThrows } from "@std/assert";
+import Environment, { createGlobalEnv } from "./environment.ts";
+import {
+  BooleanVal,
+  NativeFnVal,
+  newString,
+  NullVal,
+  NumberVal,
+} from "./values.ts";
 
 describe("Environment", () => {
   it("should declare a new variable", () => {
@@ -83,5 +89,45 @@ describe("Environment", () => {
     assertEquals(childEnv.lookupVar("childVar"), childValue);
     assertEquals(childEnv.lookupVar("parentVar"), parentValue);
     assertThrows(() => parentEnv.lookupVar("childVar"));
+  });
+});
+
+describe("createGlobalEnv()", () => {
+  it("should create an environment with global boolean variables", () => {
+    const env = createGlobalEnv();
+    const trueValue = env.lookupVar("true") as BooleanVal;
+    const falseValue = env.lookupVar("false") as BooleanVal;
+    assertEquals(trueValue.type, "boolean");
+    assertEquals(trueValue.value, true);
+    assertEquals(falseValue.type, "boolean");
+    assertEquals(falseValue.value, false);
+  });
+
+  it("should create an environment with a global null variable", () => {
+    const env = createGlobalEnv();
+    const nullValue = env.lookupVar("null");
+    assertEquals(nullValue.type, "null");
+  });
+
+  it("should create an environment with a global 'print' function", () => {
+    const env = createGlobalEnv();
+    const printFn = env.lookupVar("print") as NativeFnVal;
+    assertEquals(printFn.type, "nativeFn");
+
+    const result = printFn.call([newString("hey")], env) as NullVal;
+
+    assertEquals(result.type, "null");
+    assertEquals(result.value, null);
+  });
+
+  it("should create an environment with a global 'time' function", () => {
+    const env = createGlobalEnv();
+    const timeFn = env.lookupVar("time") as NativeFnVal;
+    assertEquals(timeFn.type, "nativeFn");
+
+    const initialTime = Date.now();
+    const timeValue = timeFn.call([], env) as NumberVal;
+    assertEquals(timeValue.type, "number");
+    assertGreaterOrEqual(timeValue.value, initialTime);
   });
 });
