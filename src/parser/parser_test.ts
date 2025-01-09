@@ -6,7 +6,6 @@ import { VariableDeclaration } from "../ast/statements.ts";
 import {
   AssignmentExpr,
   CallExpr,
-  Expr,
   Identifier,
   MemberExpr,
   NumericLiteral,
