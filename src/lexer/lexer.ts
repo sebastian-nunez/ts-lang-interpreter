@@ -23,6 +23,10 @@ export function tokenize(sourceCode: string): Token[] {
       tokens.push(newToken(TokenType.OpenBrace, src.shift()));
     } else if (src[0] === "}") {
       tokens.push(newToken(TokenType.ClosedBrace, src.shift()));
+    } else if (src[0] === "[") {
+      tokens.push(newToken(TokenType.OpenBracket, src.shift()));
+    } else if (src[0] === "]") {
+      tokens.push(newToken(TokenType.ClosedBracket, src.shift()));
     } else if (
       src[0] === "+" ||
       src[0] === "-" ||
