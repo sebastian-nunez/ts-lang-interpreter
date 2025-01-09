@@ -43,6 +43,8 @@ export function tokenize(sourceCode: string): Token[] {
       tokens.push(newToken(TokenType.Colon, src.shift()));
     } else if (src[0] === ",") {
       tokens.push(newToken(TokenType.Comma, src.shift()));
+    } else if (src[0] === ".") {
+      tokens.push(newToken(TokenType.Dot, src.shift()));
     } else {
       // Handle multi-character tokens
       if (isInt(src[0])) {

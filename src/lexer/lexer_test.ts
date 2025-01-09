@@ -100,6 +100,15 @@ describe("tokenize()", () => {
     assertEquals(tokenize(source), expected);
   });
 
+  it("should tokenize a dot", () => {
+    const source = ".";
+    const expected: Token[] = [
+      newToken(TokenType.Dot, "."),
+      newToken(TokenType.EOF, "EOF"),
+    ];
+    assertEquals(tokenize(source), expected);
+  });
+
   it("should tokenize a complex expression", () => {
     const source = "let x = 10 + 5 * (2 - 1)";
     const expected: Token[] = [

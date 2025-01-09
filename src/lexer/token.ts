@@ -20,6 +20,7 @@ export enum TokenType {
   ClosedParen,
   OpenBracket,
   ClosedBracket,
+  Dot,
   EOF,
 }
 
