@@ -1,5 +1,4 @@
 import {
-  FunctionCall,
   newBoolean,
   newNativeFn,
   newNull,
