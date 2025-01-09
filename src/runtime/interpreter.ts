@@ -142,8 +142,13 @@ function eval_binary_expr(
       rhs as NumberVal,
       binaryExpr.operator
     );
+  } else if (lhs.type === "string" && rhs.type === "string") {
+    return eval_string_binary_expr(
+      lhs as StringVal,
+      rhs as StringVal,
+      binaryExpr.operator
+    );
   }
-  // TODO: add support for string and so forth
 
   // One or both are NULL
   return { type: "null", value: null } as NullVal;
@@ -181,10 +186,36 @@ function eval_numeric_binary_expr(
       result = lhs.value % rhs.value;
       break;
     default:
-      throw new Error(`Interpreter error: Unknown operator -> '${operator}'`);
+      throw new Error(
+        `Interpreter error: Unknown operator (for numbers) -> '${operator}'`
+      );
   }
 
   return { type: "number", value: result };
+}
+
+function eval_string_binary_expr(
+  lhs: StringVal,
+  rhs: StringVal,
+  operator: string
+): StringVal {
+  const resultArr: string[] = [];
+
+  switch (operator) {
+    case "+":
+      resultArr.push(lhs.value);
+      resultArr.push(rhs.value);
+      break;
+    default:
+      throw new Error(
+        `Interpreter error: Unknown operator (for strings) -> '${operator}'`
+      );
+  }
+
+  return {
+    type: "string",
+    value: resultArr.join(""),
+  };
 }
 
 function eval_assignment_expr(

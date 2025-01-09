@@ -1,6 +1,6 @@
 import { beforeEach, describe, it } from "jsr:@std/testing/bdd";
 import { assertEquals, assertThrows } from "@std/assert";
-import { NumberVal, RuntimeVal, StringVal } from "./values.ts";
+import { NullVal, NumberVal, RuntimeVal, StringVal } from "./values.ts";
 import { Program, VariableDeclaration } from "../ast/statements.ts";
 import { evaluate } from "./interpreter.ts"; // assuming `evaluate` is in `interpreter.ts`
 import Environment from "./environment.ts";
@@ -203,6 +203,69 @@ describe("Interpreter", () => {
     };
 
     assertThrows(() => evaluate(ast, env));
+  });
+
+  it("should evaluate a binary expression (string concatenation)", () => {
+    const ast: BinaryExpr = {
+      kind: "BinaryExpr",
+      operator: "+",
+      left: {
+        kind: "StringLiteral",
+        value: "John",
+      } as StringLiteral,
+      right: {
+        kind: "StringLiteral",
+        value: " Doe",
+      } as StringLiteral,
+    };
+    const expected: RuntimeVal = {
+      type: "string",
+      value: "John Doe",
+    } as StringVal;
+
+    const result = evaluate(ast, env);
+
+    assertEquals(result, expected);
+  });
+
+  it("should fail evaluate a binary expression (string) due to invalid operator", () => {
+    const ast: BinaryExpr = {
+      kind: "BinaryExpr",
+      operator: "/",
+      left: {
+        kind: "StringLiteral",
+        value: "John",
+      } as StringLiteral,
+      right: {
+        kind: "StringLiteral",
+        value: " Doe",
+      } as StringLiteral,
+    };
+
+    assertThrows(() => evaluate(ast, env));
+  });
+
+  it("should evaluate a binary expression to null between invalid types", () => {
+    const ast: BinaryExpr = {
+      kind: "BinaryExpr",
+      operator: "/",
+      left: {
+        kind: "StringLiteral",
+        value: "John",
+      } as StringLiteral,
+      right: {
+        kind: "NumericLiteral",
+        value: 2,
+      } as NumericLiteral,
+    };
+    const expected: RuntimeVal = {
+      type: "null",
+      value: null,
+    } as NullVal;
+
+    const result = evaluate(ast, env);
+
+    assertEquals(result, expected);
   });
 
   it("should fail evaluate a binary expression due to unknown operator", () => {
