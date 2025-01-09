@@ -3,6 +3,7 @@ export type AstNode =
   // Statements
   | "Program"
   | "VariableDeclaration"
+  | "FunctionDeclaration"
 
   // Expressions
   | "AssignmentExpr"

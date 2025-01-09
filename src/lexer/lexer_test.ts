@@ -109,6 +109,15 @@ describe("tokenize()", () => {
     assertEquals(tokenize(source), expected);
   });
 
+  it("should tokenize fn keyword", () => {
+    const source = "fn";
+    const expected: Token[] = [
+      newToken(TokenType.Fn, "fn"),
+      newToken(TokenType.EOF, "EOF"),
+    ];
+    assertEquals(tokenize(source), expected);
+  });
+
   it("should tokenize a simple string", () => {
     const source = `"some string!"`;
     const expected: Token[] = [

@@ -29,3 +29,11 @@ export interface VariableDeclaration extends Stmt {
   identifier: string;
   value?: Expr; // Variables can be declared and initialized later (e.g. let x;)
 }
+
+/** Represents a function declaration. */
+export interface FunctionDeclaration extends Stmt {
+  kind: "FunctionDeclaration";
+  name: string;
+  params: string[];
+  body: Stmt[];
+}

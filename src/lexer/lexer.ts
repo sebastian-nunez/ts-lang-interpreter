@@ -6,6 +6,7 @@ const KEYWORDS: Record<string, TokenType> = {
   // Keys are case-sensitive
   let: TokenType.Let,
   const: TokenType.Const,
+  fn: TokenType.Fn,
 };
 
 /** tokenize receives source code and returns all the extracted tokens. Throws an error if any token is not recognized */

@@ -8,6 +8,7 @@ export enum TokenType {
   // Keywords
   Let,
   Const,
+  Fn,
 
   // Grouping operators
   BinaryOperator,

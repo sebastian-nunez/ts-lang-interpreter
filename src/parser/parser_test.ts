@@ -1,8 +1,8 @@
 // deno-lint-ignore-file no-explicit-any
 import { describe, it } from "jsr:@std/testing/bdd";
-import { assertEquals } from "@std/assert";
+import { assertEquals, assertThrows } from "@std/assert";
 import Parser from "./parser.ts";
-import { VariableDeclaration } from "../ast/statements.ts";
+import { FunctionDeclaration, VariableDeclaration } from "../ast/statements.ts";
 import {
   AssignmentExpr,
   CallExpr,
@@ -503,5 +503,86 @@ describe("Parser", () => {
         ],
       } as CallExpr,
     ]);
+  });
+
+  it("parses a simple function declaration expression", () => {
+    const sourceCode = "fn func() {}";
+    const parser = new Parser();
+    const program = parser.produceAST(sourceCode);
+
+    assertEquals(program.body.length, 1);
+    const expr = program.body[0] as FunctionDeclaration;
+    assertEquals(expr.kind, "FunctionDeclaration");
+    assertEquals(expr.name, "func");
+    assertEquals(expr.params, []);
+    assertEquals(expr.body, []);
+  });
+
+  it("parses a simple function declaration expression with params", () => {
+    const sourceCode = "fn func(x, y) {}";
+    const parser = new Parser();
+    const program = parser.produceAST(sourceCode);
+
+    assertEquals(program.body.length, 1);
+    const expr = program.body[0] as FunctionDeclaration;
+    assertEquals(expr.kind, "FunctionDeclaration");
+    assertEquals(expr.name, "func");
+    assertEquals(expr.params, ["x", "y"]);
+    assertEquals(expr.body, []);
+  });
+
+  it("parses a simple function declaration expression with params and body", () => {
+    const sourceCode = "fn func(x, y) { print(x, y) }";
+    const parser = new Parser();
+    const program = parser.produceAST(sourceCode);
+
+    assertEquals(program.body.length, 1);
+    const expr = program.body[0] as FunctionDeclaration;
+    assertEquals(expr.kind, "FunctionDeclaration");
+    assertEquals(expr.name, "func");
+    assertEquals(expr.params, ["x", "y"]);
+    assertEquals(expr.body, [
+      {
+        kind: "CallExpr",
+        caller: {
+          kind: "Identifier",
+          symbol: "print",
+        } as Identifier,
+        args: [
+          {
+            kind: "Identifier",
+            symbol: "x",
+          } as Identifier,
+          {
+            kind: "Identifier",
+            symbol: "y",
+          } as Identifier,
+        ],
+      } as CallExpr,
+    ]);
+  });
+
+  it("should fail to parse a function without parenthesis for the params", () => {
+    const sourceCode = "fn func x {}";
+    const parser = new Parser();
+    assertThrows(() => parser.produceAST(sourceCode));
+  });
+
+  it("should fail to parse a function without a valid name", () => {
+    const sourceCode = "fn 1func";
+    const parser = new Parser();
+    assertThrows(() => parser.produceAST(sourceCode));
+  });
+
+  it("should fail to parse a function with invalid param names", () => {
+    const sourceCode = "fn func(1invalid) {}";
+    const parser = new Parser();
+    assertThrows(() => parser.produceAST(sourceCode));
+  });
+
+  it("should fail to parse a function without function body braces", () => {
+    const sourceCode = "fn func(invalid)";
+    const parser = new Parser();
+    assertThrows(() => parser.produceAST(sourceCode));
   });
 });

@@ -10,7 +10,12 @@ import {
   PropertyLiteral,
   StringLiteral,
 } from "../ast/expressions.ts";
-import { Program, Stmt, VariableDeclaration } from "../ast/statements.ts";
+import {
+  FunctionDeclaration,
+  Program,
+  Stmt,
+  VariableDeclaration,
+} from "../ast/statements.ts";
 import { tokenize } from "../lexer/lexer.ts";
 import { Token, TokenType } from "../lexer/token.ts";
 
@@ -34,12 +39,14 @@ export default class Parser {
 
   /** parse_stmt handle complex statement types */
   private parse_stmt(): Stmt {
-    // TODO: add FunctionDeclaration, TryCatch, Loops, etc.
+    // TODO: add TryCatch, Loops, etc.
     // For now, skip to parse_expr
     switch (this.at().type) {
       case TokenType.Let:
       case TokenType.Const:
         return this.parse_var_declaration();
+      case TokenType.Fn:
+        return this.parse_function_declaration();
       default:
         return this.parse_expr();
     }
@@ -91,6 +98,53 @@ export default class Parser {
     );
 
     return declaration;
+  }
+
+  /** parse_function_declaration parses variable declaration using the `fn` keyword. Throws errors. */
+  private parse_function_declaration(): Stmt {
+    this.next(); // Consume `fn` keyword
+    const name = this.next_expect(
+      TokenType.Identifier,
+      "expected function name following `fn` keyword"
+    ).value;
+
+    if (this.at().type !== TokenType.OpenParen) {
+      throw new Error("expected open paren following function name");
+    }
+
+    const args = this.parse_function_args();
+    const params: string[] = [];
+    for (const arg of args) {
+      if (arg.kind !== "Identifier") {
+        console.log(arg);
+        throw new Error(
+          "inside function declaration expected parameters to be of type string."
+        );
+      }
+
+      params.push((arg as Identifier).symbol);
+    }
+
+    this.next_expect(
+      TokenType.OpenBrace,
+      "Expected function body following declaration"
+    );
+    const body: Stmt[] = [];
+    while (!this.at_eof() && this.at().type !== TokenType.ClosedBrace) {
+      body.push(this.parse_stmt());
+    }
+    this.next_expect(
+      TokenType.ClosedBrace,
+      "closing brace expected inside function declaration"
+    );
+
+    const fn: FunctionDeclaration = {
+      kind: "FunctionDeclaration",
+      name,
+      params,
+      body,
+    };
+    return fn;
   }
 
   /**
@@ -276,7 +330,7 @@ export default class Parser {
     let callExpr: CallExpr = {
       kind: "CallExpr",
       caller,
-      args: this.parse_function_call_args(),
+      args: this.parse_function_args(),
     };
 
     // Recursively evaluate call expressions e.g. foo.Func1()() where Func1 returns a function to call.
@@ -289,7 +343,7 @@ export default class Parser {
   }
 
   /** parse_function_call_args parses arguments of function call. Throws errors. */
-  private parse_function_call_args(): Expr[] {
+  private parse_function_args(): Expr[] {
     this.next_expect(
       TokenType.OpenParen,
       "expected open parenthesis when parsing function arguments"
@@ -307,7 +361,7 @@ export default class Parser {
     return args;
   }
 
-  /** helper_parse_args_list is a helper function for parse_function_call_args. */
+  /** helper_parse_args_list is a helper function for parse_function_args. */
   private helper_parse_args_list(): Expr[] {
     // We can to allow something like `foo(x = 5, y = "Bar")` where we can assign variables THEN get their values as args.
     // This would first set `x = 5` and `y = "Bar"` in the outer scope.
@@ -442,12 +496,11 @@ export default class Parser {
   private next_expect(type: TokenType, error: string | Error) {
     const prev = this.tokens.shift() as Token;
     if (!prev || prev.type !== type) {
-      console.error(
+      throw new Error(
         `Parser error:\n${error}, got ${JSON.stringify(
           prev
         )} - expected: ${type}`
       );
-      Deno.exit(1);
     }
 
     return prev;
