@@ -1,5 +1,6 @@
 import { Program, Stmt, VariableDeclaration } from "../ast/statements.ts";
 import {
+  NativeFnVal,
   newNull,
   newObject,
   NullVal,
@@ -9,6 +10,7 @@ import {
 import {
   AssignmentExpr,
   BinaryExpr,
+  CallExpr,
   Identifier,
   NumericLiteral,
   ObjectLiteral,
@@ -30,10 +32,13 @@ export function evaluate(astNode: Stmt, env: Environment): RuntimeVal {
       return eval_identifier(astNode as Identifier, env);
     case "ObjectLiteral":
       return eval_object_expr(astNode as ObjectLiteral, env);
+    case "CallExpr":
+      return eval_function_call_expr(astNode as CallExpr, env);
     case "BinaryExpr":
       return eval_binary_expr(astNode as BinaryExpr, env);
     case "AssignmentExpr":
       return eval_assignment_expr(astNode as AssignmentExpr, env);
+
     default:
       console.error(
         `This AST node has not been setup for interpretation: ${JSON.stringify(
@@ -92,6 +97,24 @@ function eval_object_expr(obj: ObjectLiteral, env: Environment): RuntimeVal {
   }
 
   return objVal;
+}
+
+function eval_function_call_expr(
+  callExpr: CallExpr,
+  env: Environment
+): RuntimeVal {
+  const args = callExpr.args.map((arg) => evaluate(arg, env));
+  const fnVal = evaluate(callExpr.caller, env); // get the function identifier
+
+  // Can only call on native function or user-defined functions
+  if (fnVal.type !== "nativeFn") {
+    throw new Error(
+      "cannot call value that is not a function: " + JSON.stringify(fnVal)
+    );
+  }
+
+  const result = (fnVal as NativeFnVal).call(args, env);
+  return result;
 }
 
 function eval_binary_expr(

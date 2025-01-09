@@ -1,4 +1,11 @@
-import { newBoolean, newNull, RuntimeVal } from "./values.ts";
+import {
+  FunctionCall,
+  newBoolean,
+  newNativeFn,
+  newNull,
+  newNumber,
+  RuntimeVal,
+} from "./values.ts";
 
 export default class Environment {
   private variables: Map<string, RuntimeVal>;
@@ -70,10 +77,27 @@ export default class Environment {
 export function createGlobalEnv(): Environment {
   const env = new Environment();
 
-  // Default global environment
+  // Global variables
   env.declareVar("true", newBoolean(true), true);
   env.declareVar("false", newBoolean(false), true);
   env.declareVar("null", newNull(), true);
+
+  // Global functions
+  env.declareVar(
+    "print",
+    newNativeFn((args: RuntimeVal[], _env: Environment): RuntimeVal => {
+      console.log(...args);
+      return newNull();
+    }),
+    true
+  );
+  env.declareVar(
+    "time",
+    newNativeFn((_args: RuntimeVal[], _env: Environment): RuntimeVal => {
+      return newNumber(Date.now());
+    }),
+    true
+  );
 
   return env;
 }

@@ -1,5 +1,7 @@
+import Environment from "./environment.ts";
+
 /** ValueType represents the types of values encountered at runtime */
-export type ValueType = "null" | "number" | "boolean" | "object";
+export type ValueType = "null" | "number" | "boolean" | "object" | "nativeFn";
 
 /** RuntimeVal represents a value encountered at runtime */
 export interface RuntimeVal {
@@ -53,5 +55,20 @@ export function newObject(
   return {
     type: "object",
     properties,
+  };
+}
+
+/** FunctionCall represents a callable function at runtime. */
+export type FunctionCall = (args: RuntimeVal[], env: Environment) => RuntimeVal;
+
+/**  NativeFnVal is a runtime native function defined in the global scope of the program. */
+export interface NativeFnVal extends RuntimeVal {
+  type: "nativeFn";
+  call: FunctionCall;
+}
+export function newNativeFn(call: FunctionCall): NativeFnVal {
+  return {
+    type: "nativeFn",
+    call,
   };
 }
